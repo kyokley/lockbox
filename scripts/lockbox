@@ -40,11 +40,11 @@ def main(cmd, infile, outfile):
         print(__doc__)
         return
 
-    passphrase = getpass.getpass('Enter passphrase: ').encode('utf-8')
-
     stdin_data = None
     if not infile or infile == '-':
         stdin_data = sys.stdin.read().encode('utf-8')
+
+    passphrase = getpass.getpass('Enter passphrase: ').encode('utf-8')
 
     if cmd == ENCRYPT:
         confirm_passphrase = getpass.getpass('Confirm passphrase: ').encode('utf-8')
