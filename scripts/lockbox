@@ -12,7 +12,7 @@ Arguments:
 
 Options:
     -o FILE --output=FILE   file to be used for outputted data
-                            specifying an output file with a '.jpg' or '.png
+                            specifying an output file with a '.png'
                             extension will write a QR code to FILE
 
 Without -o FILE given, lockbox will display data to stdout

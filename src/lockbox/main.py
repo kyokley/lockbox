@@ -14,9 +14,7 @@ HASH_ITERATIONS = 100000
 
 CHUNK_SIZE = 1024 * 1024 * 1024 * 10 # 10 MB
 
-QR_CODE_EXTENSIONS = ('.jpg',
-                      '.jpeg',
-                      '.png',
+QR_CODE_EXTENSIONS = ('.png',
                       )
 
 def _get_fernet(password, salt):
