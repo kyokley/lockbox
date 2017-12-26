@@ -107,7 +107,7 @@ def _split_encrypted_file(infile):
 
 def decrypt_file(password, encrypted_file, output_file=None):
     if not os.path.exists(encrypted_file):
-        raise Exception('{} does not exist'.format(encrypted_file))
+        raise LockBoxException('{} does not exist'.format(encrypted_file))
 
     file_lines = _split_encrypted_file(encrypted_file)
 
