@@ -16,7 +16,8 @@ setup(
     test_suite='nose.collector',
     install_requires=['cryptography',
                       'qrcode-terminal',
-                      'docopt'],
+                      'docopt',
+                      'blessings'],
     tests_require=[
     ],
     zip_safe=False,

@@ -3,3 +3,4 @@ pdbpp
 cryptography
 qrcode-terminal
 docopt
+blessings

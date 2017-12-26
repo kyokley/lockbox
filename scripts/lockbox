@@ -17,22 +17,26 @@ Options:
 
 Without -o FILE given, lockbox will display data to stdout
 """
+import getpass
+import sys
 
 from docopt import docopt
+from blessings import Terminal
+
 from lockbox import (encrypt,
                      decrypt,
                      encrypt_file,
                      decrypt_file,
+                     LockBoxException,
                      )
-
 from lockbox._version import get_versions
 
-import getpass
-import sys
 
 VERSION = get_versions()['version']
 ENCRYPT = 'encrypt'
 DECRYPT = 'decrypt'
+
+term = Terminal()
 
 def main(cmd, infile, outfile):
     if cmd not in (ENCRYPT, DECRYPT):
@@ -78,4 +82,7 @@ if __name__ == '__main__':
         infile = args['<input>']
         outfile = args['--output']
 
-        main(cmd, infile, outfile)
+        try:
+            main(cmd, infile, outfile)
+        except LockBoxException as e:
+            print(term.red(str(e)))

@@ -1,7 +1,7 @@
 import base64
 import os
 
-from cryptography.fernet import Fernet
+from cryptography.fernet import Fernet, InvalidToken
 from cryptography.hazmat.backends import default_backend
 from cryptography.hazmat.primitives import hashes
 from cryptography.hazmat.primitives.kdf.pbkdf2 import PBKDF2HMAC
@@ -12,10 +12,13 @@ SALT_LENGTH = 16
 KEY_LENGTH = 32
 HASH_ITERATIONS = 100000
 
-CHUNK_SIZE = 1024 * 1024 * 1024 * 10 # 10 MB
+CHUNK_SIZE = 1024 * 1024 * 10 # 10 MB
 
 QR_CODE_EXTENSIONS = ('.png',
                       )
+
+class LockBoxException(Exception):
+    pass
 
 def _get_fernet(password, salt):
     kdf = PBKDF2HMAC(algorithm=hashes.SHA256(),
@@ -64,7 +67,11 @@ def decrypt(password, cipher_data, outfile=None):
 
     salt = base64.urlsafe_b64decode(encoded_salt)
     fernet = _get_fernet(password, salt)
-    plaintext = fernet.decrypt(data)
+
+    try:
+        plaintext = fernet.decrypt(data)
+    except InvalidToken:
+        raise LockBoxException('Invalid Token has been provided')
 
     if not outfile:
         return plaintext
@@ -74,7 +81,7 @@ def decrypt(password, cipher_data, outfile=None):
 
 def encrypt_file(password, input_file, output_file=None):
     if not os.path.exists(input_file):
-        raise Exception('{} does not exist'.format(input_file))
+        raise LockBoxException('{} does not exist'.format(input_file))
 
     with open(input_file, 'rb') as infile:
         if output_file:
