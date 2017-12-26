@@ -1,3 +1,5 @@
 bpython
 pdbpp
 cryptography
+qrcode-terminal
+docopt

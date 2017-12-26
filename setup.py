@@ -14,7 +14,9 @@ setup(
     entry_points={},
     scripts=['scripts/lockbox'],
     test_suite='nose.collector',
-    install_requires=['cryptography'],
+    install_requires=['cryptography',
+                      'qrcode-terminal',
+                      'docopt'],
     tests_require=[
     ],
     zip_safe=False,
