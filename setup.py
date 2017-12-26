@@ -2,7 +2,7 @@ from setuptools import setup, find_packages
 import versioneer
 
 setup(
-    name='encrypt_file',
+    name='lockbox',
     description="Simple script to encrypt a given file",
     author="Kevin Yokley",
     author_email='kyokley2@gmail.com',
@@ -12,7 +12,7 @@ setup(
     package_dir={'': 'src'},
     include_package_data=True,
     entry_points={},
-    scripts=['scripts/encrypt_file'],
+    scripts=['scripts/lockbox'],
     test_suite='nose.collector',
     install_requires=['cryptography'],
     tests_require=[

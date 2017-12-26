@@ -1,2 +1,2 @@
 include versioneer.py
-include src/encrypt_file/_version.py
+include src/lockbox/_version.py

@@ -42,8 +42,8 @@ def get_config():
     cfg.VCS = "git"
     cfg.style = "pep440"
     cfg.tag_prefix = ""
-    cfg.parentdir_prefix = "encrypt_file-"
-    cfg.versionfile_source = "src/encrypt_file/_version.py"
+    cfg.parentdir_prefix = "lockbox-"
+    cfg.versionfile_source = "src/lockbox/_version.py"
     cfg.verbose = False
     return cfg
 
