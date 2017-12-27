@@ -1,7 +1,10 @@
 from unittest import mock
 import pytest
 
-from lockbox.main import encrypt, SALT_LENGTH
+from lockbox.main import (encrypt,
+                          SALT_LENGTH,
+                          decrypt,
+                          )
 
 class TestEncrypt(object):
     def setup_method(self):
@@ -109,3 +112,34 @@ class TestEncrypt(object):
         self.mock_qrcode.make.return_value.save.assert_called_once_with('test_outfile.png')
 
         assert not self.mock_open.called
+
+class TestDecrypt(object):
+    def setup_method(self):
+        self._get_fernet_patcher = mock.patch('lockbox.main._get_fernet')
+        self.mock_get_fernet = self._get_fernet_patcher.start()
+        self.mock_get_fernet.return_value.encrypt.return_value = b'test_cipher_data'
+
+        self.urlsafe_b64decode_patcher = mock.patch('lockbox.main.base64.urlsafe_b64decode')
+        self.mock_urlsafe_b64decode = self.urlsafe_b64decode_patcher.start()
+        self.mock_urlsafe_b64decode.return_value = b'test_decoded_salt'
+
+        self.password = b'password'
+        self.ciphertext = b'ciphertext'
+
+    def teardown_method(self):
+        self._get_fernet_patcher.stop()
+        self.urlsafe_b64decode_patcher.stop()
+
+    def test_password_is_str_raises(self):
+        with pytest.raises(ValueError):
+            decrypt('password', self.ciphertext)
+
+        assert not self.mock_urlsafe_b64decode.called
+        assert not self.mock_get_fernet.called
+
+    def test_cipher_data_is_str_raises(self):
+        with pytest.raises(ValueError):
+            decrypt(self.password, 'ciphertext')
+
+        assert not self.mock_urlsafe_b64decode.called
+        assert not self.mock_get_fernet.called
