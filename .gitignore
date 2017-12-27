@@ -1,3 +1,4 @@
 *.pyc
 py3
 *.egg-info
+*.cache
