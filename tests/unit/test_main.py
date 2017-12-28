@@ -1,9 +1,12 @@
 from unittest import mock
 import pytest
 
+from cryptography.fernet import InvalidToken
+
 from lockbox.main import (encrypt,
                           SALT_LENGTH,
                           decrypt,
+                          LockBoxException,
                           )
 
 class TestEncrypt(object):
@@ -117,18 +120,22 @@ class TestDecrypt(object):
     def setup_method(self):
         self._get_fernet_patcher = mock.patch('lockbox.main._get_fernet')
         self.mock_get_fernet = self._get_fernet_patcher.start()
-        self.mock_get_fernet.return_value.encrypt.return_value = b'test_cipher_data'
+        self.mock_get_fernet.return_value.decrypt.return_value = b'test_plaintext_data'
 
         self.urlsafe_b64decode_patcher = mock.patch('lockbox.main.base64.urlsafe_b64decode')
         self.mock_urlsafe_b64decode = self.urlsafe_b64decode_patcher.start()
         self.mock_urlsafe_b64decode.return_value = b'test_decoded_salt'
 
+        self.open_patcher = mock.patch('lockbox.main.open', mock.mock_open())
+        self.mock_open = self.open_patcher.start()
+
         self.password = b'password'
-        self.ciphertext = b'ciphertext'
+        self.ciphertext = b'encoded_salt$ciphertext'
 
     def teardown_method(self):
         self._get_fernet_patcher.stop()
         self.urlsafe_b64decode_patcher.stop()
+        self.open_patcher.stop()
 
     def test_password_is_str_raises(self):
         with pytest.raises(ValueError):
@@ -136,6 +143,7 @@ class TestDecrypt(object):
 
         assert not self.mock_urlsafe_b64decode.called
         assert not self.mock_get_fernet.called
+        assert not self.mock_open.called
 
     def test_cipher_data_is_str_raises(self):
         with pytest.raises(ValueError):
@@ -143,3 +151,40 @@ class TestDecrypt(object):
 
         assert not self.mock_urlsafe_b64decode.called
         assert not self.mock_get_fernet.called
+        assert not self.mock_open.called
+
+    def test_invalid_token_raises(self):
+        self.mock_get_fernet.return_value.decrypt.side_effect = InvalidToken()
+
+        with pytest.raises(LockBoxException):
+            decrypt(self.password, self.ciphertext)
+
+        self.mock_urlsafe_b64decode.assert_called_once_with(b'encoded_salt')
+        self.mock_get_fernet.assert_called_once_with(self.password, b'test_decoded_salt')
+        self.mock_get_fernet.return_value.decrypt.assert_called_once_with(b'ciphertext')
+
+        assert not self.mock_open.called
+
+    def test_no_outfile(self):
+        expected = b'test_plaintext_data'
+        actual = decrypt(self.password, self.ciphertext)
+
+        assert expected == actual
+
+        self.mock_urlsafe_b64decode.assert_called_once_with(b'encoded_salt')
+        self.mock_get_fernet.assert_called_once_with(self.password, b'test_decoded_salt')
+        self.mock_get_fernet.return_value.decrypt.assert_called_once_with(b'ciphertext')
+
+        assert not self.mock_open.called
+
+    def test_outfile(self):
+        expected = None
+        actual = decrypt(self.password, self.ciphertext, outfile='test_outfile.txt')
+
+        assert expected == actual
+
+        self.mock_urlsafe_b64decode.assert_called_once_with(b'encoded_salt')
+        self.mock_get_fernet.assert_called_once_with(self.password, b'test_decoded_salt')
+        self.mock_get_fernet.return_value.decrypt.assert_called_once_with(b'ciphertext')
+
+        self.mock_open.return_value.write.assert_called_once_with(b'test_plaintext_data')
