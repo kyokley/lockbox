@@ -7,6 +7,10 @@ from lockbox.main import (encrypt,
                           SALT_LENGTH,
                           decrypt,
                           LockBoxException,
+                          _get_fernet,
+                          encrypt_file,
+                          _split_encrypted_file,
+                          decrypt_file,
                           )
 
 class TestEncrypt(object):
@@ -188,3 +192,138 @@ class TestDecrypt(object):
         self.mock_get_fernet.return_value.decrypt.assert_called_once_with(b'ciphertext')
 
         self.mock_open.return_value.write.assert_called_once_with(b'test_plaintext_data')
+
+class TestEncryptFile(object):
+    def setup_method(self):
+        self.exists_patcher = mock.patch('lockbox.main.os.path.exists')
+        self.mock_exists = self.exists_patcher.start()
+
+        self.open_patcher = mock.patch('lockbox.main.open', mock.mock_open(read_data=b'lorem ipsum'))
+        self.mock_open = self.open_patcher.start()
+        self.mock_exists.return_value = True
+
+        self.print_patcher = mock.patch('lockbox.main.print')
+        self.mock_print = self.print_patcher.start()
+
+        self.encrypt_patcher = mock.patch('lockbox.main.encrypt')
+        self.mock_encrypt = self.encrypt_patcher.start()
+
+        self.password = b'password'
+        self.input_file = 'test_input_file.txt'
+
+    def teardown_method(self):
+        self.exists_patcher.stop()
+        self.open_patcher.stop()
+        self.print_patcher.stop()
+        self.encrypt_patcher.stop()
+
+    def test_input_file_does_not_exist(self):
+        self.mock_exists.return_value = False
+
+        with pytest.raises(LockBoxException):
+            encrypt_file(self.password, self.input_file)
+
+        self.mock_exists.assert_called_once_with(self.input_file)
+
+    def test_no_outfile(self):
+        expected = None
+        actual = encrypt_file(self.password, self.input_file)
+
+        assert expected == actual
+        self.mock_encrypt.assert_called_once_with(self.password, b'lorem ipsum')
+        self.mock_print.assert_called_once_with(self.mock_encrypt.return_value.decode.return_value)
+        self.mock_encrypt.return_value.decode.assert_called_once_with('utf-8')
+
+        assert not self.mock_open.return_value.write.called
+
+    def test_outfile(self):
+        expected = None
+        actual = encrypt_file(self.password, self.input_file, output_file='output_file.txt')
+
+        assert expected == actual
+        self.mock_encrypt.assert_called_once_with(self.password, b'lorem ipsum')
+        assert not self.mock_print.called
+        self.mock_open.return_value.write.assert_called_once_with(self.mock_encrypt.return_value + b'\n')
+
+class TestSplitEncryptedFile(object):
+    def setup_method(self):
+        self.open_patcher = mock.patch('lockbox.main.open', mock.mock_open(read_data=b'line1\nline2\nline3'))
+        self.mock_open = self.open_patcher.start()
+
+    def teardown_method(self):
+        self.open_patcher.stop()
+
+    def test_split_encrypted_file(self):
+        expected = ['line1', 'line2', 'line3']
+        actual = [x for x in _split_encrypted_file('test_file.txt')]
+
+class TestDecryptFile(object):
+    def setup_method(self):
+        self.exists_patcher = mock.patch('lockbox.main.os.path.exists')
+        self.mock_exists = self.exists_patcher.start()
+        self.mock_exists.return_value = True
+
+        self.decrypt_patcher = mock.patch('lockbox.main.decrypt')
+        self.mock_decrypt = self.decrypt_patcher.start()
+        self.mock_decrypt.side_effect = [b'decrypted_line1',
+                                         b'decrypted_line2',
+                                         b'decrypted_line3',
+                                         ]
+
+        self._split_encrypted_file_patcher = mock.patch('lockbox.main._split_encrypted_file')
+        self.mock_split_encrypted_file = self._split_encrypted_file_patcher.start()
+        self.mock_split_encrypted_file.return_value = ['line1', 'line2', 'line3']
+
+        self.open_patcher = mock.patch('lockbox.main.open', mock.mock_open())
+        self.mock_open = self.open_patcher.start()
+
+        self.print_patcher = mock.patch('lockbox.main.print')
+        self.mock_print = self.print_patcher.start()
+
+        self.password = b'password'
+        self.input_file = 'test_input_file.txt'
+
+    def teardown_method(self):
+        self.exists_patcher.stop()
+        self.decrypt_patcher.stop()
+        self._split_encrypted_file_patcher.stop()
+        self.open_patcher.stop()
+        self.print_patcher.stop()
+
+    def test_input_file_does_not_exist(self):
+        self.mock_exists.return_value = False
+
+        with pytest.raises(LockBoxException):
+            decrypt_file(self.password, self.input_file)
+
+    def test_no_output_file(self):
+        expected = None
+        actual = decrypt_file(self.password, self.input_file)
+
+        assert expected == actual
+        self.mock_split_encrypted_file.assert_called_once_with(self.input_file)
+        self.mock_decrypt.assert_has_calls([mock.call(self.password, 'line1'),
+                                            mock.call(self.password, 'line2'),
+                                            mock.call(self.password, 'line3'),
+                                            ])
+        self.mock_print.assert_has_calls([mock.call('decrypted_line1'),
+                                          mock.call('decrypted_line2'),
+                                          mock.call('decrypted_line3'),
+                                          ])
+        assert not self.mock_open.called
+
+    def test_with_output_file(self):
+        expected = None
+        actual = decrypt_file(self.password, self.input_file, output_file='output_file.txt')
+
+        assert expected == actual
+        self.mock_split_encrypted_file.assert_called_once_with(self.input_file)
+        self.mock_decrypt.assert_has_calls([mock.call(self.password, 'line1'),
+                                            mock.call(self.password, 'line2'),
+                                            mock.call(self.password, 'line3'),
+                                            ])
+        assert not self.mock_print.called
+        self.mock_open.return_value.write.assert_has_calls([mock.call(b'decrypted_line1'),
+                                                            mock.call(b'decrypted_line2'),
+                                                            mock.call(b'decrypted_line3'),
+                                                            ])
