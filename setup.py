@@ -13,13 +13,12 @@ setup(
     include_package_data=True,
     entry_points={},
     scripts=['scripts/lockbox'],
-    test_suite='nose.collector',
     install_requires=['cryptography',
                       'qrcode-terminal',
                       'docopt',
                       'blessings'],
-    tests_require=[
-    ],
+    setup_requires=['pytest-runner'],
+    tests_require=['pytest'],
     zip_safe=False,
     keywords='crypto',
     classifiers=[
