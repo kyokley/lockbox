@@ -13,7 +13,7 @@
 import errno
 import os
 import re
-import subprocess
+import subprocess  # nosec
 import sys
 
 
@@ -70,13 +70,13 @@ def register_vcs_handler(vcs, method):  # decorator
 def run_command(commands, args, cwd=None, verbose=False, hide_stderr=False,
                 env=None):
     """Call the given command(s)."""
-    assert isinstance(commands, list)
+    assert isinstance(commands, list)  # nosec
     p = None
     for c in commands:
         try:
             dispcmd = str([c] + args)
             # remember shell=False, so use git.cmd on windows, not just git
-            p = subprocess.Popen([c] + args, cwd=cwd, env=env,
+            p = subprocess.Popen([c] + args, cwd=cwd, env=env,  # nosec
                                  stdout=subprocess.PIPE,
                                  stderr=(subprocess.PIPE if hide_stderr
                                          else None))
