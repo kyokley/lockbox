@@ -1,5 +1,5 @@
 # LockBox
-Simple AES Encryption
+Simple Passphrase-based AES Encryption
 
 ## Purpose
 Lockbox is a wrapper around [cryptography's](https://cryptography.io/en/latest/) fernet symmetric key encryption implementation. The goal is to be as simple as possible. The only inputs required are a passphrase and the data to be encrypted/decrypted.
