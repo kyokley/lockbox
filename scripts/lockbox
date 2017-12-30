@@ -1,9 +1,9 @@
 #!/usr/bin/env python
-"""lockbox
-
+"""
 Usage:
     lockbox <cmd> [<input>] [options]
     lockbox --version
+    lockbox --help
 
 Arguments:
     cmd    encrypt or decrypt
@@ -15,10 +15,12 @@ Options:
     -o FILE --output=FILE       file to be used for outputted data
                                 specifying an output file with a '.png'
                                 extension will write a QR code to FILE
+    -h --help                   display this help
 
 Without -o FILE given, lockbox will display data to stdout
 
-Be careful using the -s STRING option on the command line as your unencrypted plaintext may be stored in your history. Also, when using the -s option, any data provided through stdin will be ignored.
+Be careful using the -s STRING option on the command line as your unencrypted plaintext may be stored in your history.
+Also, when using the -s option, any data provided through stdin will be ignored.
 """
 import getpass
 import sys
