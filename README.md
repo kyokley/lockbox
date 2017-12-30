@@ -5,15 +5,14 @@ Simple AES Encryption
 Lockbox is a wrapper around [cryptography's](https://cryptography.io/en/latest/) fernet symmetric key encryption implementation. The goal is to be as simple as possible. The only inputs required are a passphrase and the data to be encrypted/decrypted.
 
 ## Usage:
-```python
-from lockbox import encrypt, decrypt
+```
+>>> from lockbox import encrypt, decrypt
 
-ciphertext = encrypt(b'password', b'this is a secret')
-ciphertext
+>>> ciphertext = encrypt(b'password', b'this is a secret')
+>>> ciphertext
 b'vMFVfjg...'
 
-plaintext = decrypt(b'password', ciphertext)
-plaintext
+>>> decrypt(b'password', ciphertext)
 b'this is a secret'
 ```
 Or using the CLI,
