@@ -1,4 +1,4 @@
-# LockBox
+# LockBox [![Build Status](https://travis-ci.org/kyokley/lockbox.svg?branch=master)](https://travis-ci.org/kyokley/lockbox)
 Simple Passphrase-based AES Encryption
 
 ## Purpose
