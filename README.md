@@ -54,10 +54,10 @@ Also, when using the -s option, any data provided through stdin will be ignored.
 ### Other Examples
 Lockbox also works against files
 ```
-from lockbox import encrypt_file, decrypt_file
-encrypt_file(b'password', '/path/to/file', output_file='/path/to/file.enc')
+>>> from lockbox import encrypt_file, decrypt_file
+>>> encrypt_file(b'password', '/path/to/file', output_file='/path/to/file.enc')
 
-decrypt_file(b'password', '/path/to/file.enc', output_file='/path/to/decrypted')
+>>> decrypt_file(b'password', '/path/to/file.enc', output_file='/path/to/decrypted')
 ```
 In the example above, after completing the decryption step, the files */path/to/file* and */path/to/decrypted* should have the same contents.
 
