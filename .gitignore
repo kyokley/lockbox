@@ -2,3 +2,6 @@
 py3
 *.egg-info
 *.cache
+build
+dist
+*.eggs
