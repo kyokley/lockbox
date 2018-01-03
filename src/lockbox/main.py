@@ -33,10 +33,10 @@ def _get_fernet(password, salt):
 
 def encrypt(password, plain_data, outfile=None):
     if not isinstance(password, bytes):
-        raise ValueError('password must be of type bytes')
+        password = password.encode('utf-8')
 
     if not isinstance(plain_data, bytes):
-        raise ValueError('plain_data must be of type bytes')
+        plain_data = plain_data.encode('utf-8')
 
     salt = os.urandom(SALT_LENGTH)
     fernet = _get_fernet(password, salt)
@@ -58,10 +58,10 @@ def encrypt(password, plain_data, outfile=None):
 
 def decrypt(password, cipher_data, outfile=None):
     if not isinstance(password, bytes):
-        raise ValueError('password must be of type bytes')
+        password = password.encode('utf-8')
 
     if not isinstance(cipher_data, bytes):
-        raise ValueError('cipher_data must be of type bytes')
+        cipher_data = cipher_data.encode('utf-8')
 
     encoded_salt, data = cipher_data.split(b'$')
 

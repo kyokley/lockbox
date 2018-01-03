@@ -7,7 +7,6 @@ from lockbox.main import (encrypt,
                           SALT_LENGTH,
                           decrypt,
                           LockBoxException,
-                          _get_fernet,
                           encrypt_file,
                           _split_encrypted_file,
                           decrypt_file,
@@ -44,32 +43,34 @@ class TestEncrypt(object):
         self.qrcode_patcher.stop()
         self.open_patcher.stop()
 
-    def test_password_is_str_raises(self):
-        with pytest.raises(ValueError):
-            encrypt('test_password', self.plaintext)
+    def test_password_is_str(self):
+        expected = b'test_encoded_salt$test_cipher_data'
+        actual = encrypt('test_password', self.plaintext)
 
-        assert not self.mock_urandom.called
-        assert not self.mock_get_fernet.called
-        assert not self.mock_get_fernet.return_value.encrypt.called
-        assert not self.mock_urlsafe_b64encode.called
+        assert expected == actual
+
+        self.mock_urandom.assert_called_once_with(SALT_LENGTH)
+        self.mock_get_fernet.assert_called_once_with(b'test_password', self.mock_urandom.return_value)
+        self.mock_get_fernet.return_value.encrypt.assert_called_once_with(self.plaintext)
+        self.mock_urlsafe_b64encode.assert_called_once_with(self.mock_urandom.return_value)
 
         assert not self.mock_qrcode.make.called
         assert not self.mock_qrcode.make.return_value.save.called
-
         assert not self.mock_open.called
 
-    def test_data_is_str_raises(self):
-        with pytest.raises(ValueError):
-            encrypt(self.password, 'test_data')
+    def test_data_is_str(self):
+        expected = b'test_encoded_salt$test_cipher_data'
+        actual = encrypt(self.password, 'test_data')
 
-        assert not self.mock_urandom.called
-        assert not self.mock_get_fernet.called
-        assert not self.mock_get_fernet.return_value.encrypt.called
-        assert not self.mock_urlsafe_b64encode.called
+        assert expected == actual
+
+        self.mock_urandom.assert_called_once_with(SALT_LENGTH)
+        self.mock_get_fernet.assert_called_once_with(self.password, self.mock_urandom.return_value)
+        self.mock_get_fernet.return_value.encrypt.assert_called_once_with(b'test_data')
+        self.mock_urlsafe_b64encode.assert_called_once_with(self.mock_urandom.return_value)
 
         assert not self.mock_qrcode.make.called
         assert not self.mock_qrcode.make.return_value.save.called
-
         assert not self.mock_open.called
 
     def test_no_outfile(self):
@@ -142,19 +143,27 @@ class TestDecrypt(object):
         self.open_patcher.stop()
 
     def test_password_is_str_raises(self):
-        with pytest.raises(ValueError):
-            decrypt('password', self.ciphertext)
+        expected = b'test_plaintext_data'
+        actual = decrypt('password', self.ciphertext)
 
-        assert not self.mock_urlsafe_b64decode.called
-        assert not self.mock_get_fernet.called
+        assert expected == actual
+
+        self.mock_urlsafe_b64decode.assert_called_once_with(b'encoded_salt')
+        self.mock_get_fernet.assert_called_once_with(self.password, b'test_decoded_salt')
+        self.mock_get_fernet.return_value.decrypt.assert_called_once_with(b'ciphertext')
+
         assert not self.mock_open.called
 
     def test_cipher_data_is_str_raises(self):
-        with pytest.raises(ValueError):
-            decrypt(self.password, 'ciphertext')
+        expected = b'test_plaintext_data'
+        actual = decrypt(self.password, 'encoded_salt$ciphertext')
 
-        assert not self.mock_urlsafe_b64decode.called
-        assert not self.mock_get_fernet.called
+        assert expected == actual
+
+        self.mock_urlsafe_b64decode.assert_called_once_with(b'encoded_salt')
+        self.mock_get_fernet.assert_called_once_with(self.password, b'test_decoded_salt')
+        self.mock_get_fernet.return_value.decrypt.assert_called_once_with(b'ciphertext')
+
         assert not self.mock_open.called
 
     def test_invalid_token_raises(self):
@@ -200,6 +209,7 @@ class TestEncryptFile(object):
 
         self.open_patcher = mock.patch('lockbox.main.open', mock.mock_open(read_data=b'lorem ipsum'))
         self.mock_open = self.open_patcher.start()
+
         self.mock_exists.return_value = True
 
         self.print_patcher = mock.patch('lockbox.main.print')
@@ -244,18 +254,6 @@ class TestEncryptFile(object):
         self.mock_encrypt.assert_called_once_with(self.password, b'lorem ipsum')
         assert not self.mock_print.called
         self.mock_open.return_value.write.assert_called_once_with(self.mock_encrypt.return_value + b'\n')
-
-class TestSplitEncryptedFile(object):
-    def setup_method(self):
-        self.open_patcher = mock.patch('lockbox.main.open', mock.mock_open(read_data=b'line1\nline2\nline3'))
-        self.mock_open = self.open_patcher.start()
-
-    def teardown_method(self):
-        self.open_patcher.stop()
-
-    def test_split_encrypted_file(self):
-        expected = ['line1', 'line2', 'line3']
-        actual = [x for x in _split_encrypted_file('test_file.txt')]
 
 class TestDecryptFile(object):
     def setup_method(self):
