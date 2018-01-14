@@ -10,6 +10,7 @@ from lockbox.main import (encrypt,
                           encrypt_file,
                           _split_encrypted_file,
                           decrypt_file,
+                          encrypt_directory,
                           )
 
 class TestEncrypt(object):
@@ -325,3 +326,33 @@ class TestDecryptFile(object):
                                                             mock.call(b'decrypted_line2'),
                                                             mock.call(b'decrypted_line3'),
                                                             ])
+
+class TestEncryptDirectory(object):
+    def setup_method(self):
+        self.exists_patcher = mock.patch('lockbox.main.os.path.exists')
+        self.mock_exists = self.exists_patcher.start()
+
+        self.isdir_patcher = mock.patch('lockbox.main.os.path.isdir')
+        self.mock_isdir = self.isdir_patcher.start()
+
+        self.islink_patcher = mock.patch('lockbox.main.os.path.islink')
+        self.mock_islink = self.islink_patcher.start()
+
+        self.encrypt_file_patcher = mock.patch('lockbox.main.encrypt_file')
+        self.mock_encrypt_file = self.encrypt_file_patcher.start()
+
+    def teardown_method(self):
+        self.exists_patcher.stop()
+        self.isdir_patcher.stop()
+        self.islink_patcher.stop()
+        self.encrypt_file_patcher.stop()
+
+    def test_non_existent_dir_raises(self):
+        self.mock_exists.return_value = False
+
+        with pytest.raises(LockBoxException):
+            encrypt_directory('password', 'test_dir')
+
+        assert not self.mock_isdir.called
+        assert not self.mock_islink.called
+        assert not self.mock_encrypt_file.called
