@@ -399,10 +399,12 @@ class TestEncryptDirectory(object):
                                            ])
         self.mock_encrypt_file.assert_has_calls([mock.call(self.password,
                                                            'root/file1',
-                                                           output_file='root/file1.lockbox'),
+                                                           output_file='root/file1.lockbox',
+                                                           remove_original=True),
                                                  mock.call(self.password,
                                                            'root/file2',
-                                                           output_file='root/file2.lockbox'),
+                                                           output_file='root/file2.lockbox',
+                                                           remove_original=True),
                                                  ])
 
 class TestDecryptDirectory(object):
@@ -478,9 +480,11 @@ class TestDecryptDirectory(object):
                                            ])
         self.mock_decrypt_file.assert_has_calls([mock.call(self.password,
                                                            'root/file1.lockbox',
-                                                           output_file='root/file1'),
+                                                           output_file='root/file1',
+                                                           remove_original=True),
                                                  mock.call(self.password,
                                                            'root/file2.lockbox',
-                                                           output_file='root/file2'),
+                                                           output_file='root/file2',
+                                                           remove_original=True),
                                                  ])
 

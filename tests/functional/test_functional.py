@@ -57,10 +57,39 @@ class TestEncryptFileDecryptFileRoundTrip(object):
 
             encrypt_file(self.password, plaintext_filename, output_file=encrypted_filename)
 
+            assert os.path.exists(plaintext_filename)
+
             test_filename = os.path.join(tmp_dir, 'test_filename.txt')
             decrypt_file(self.password, encrypted_filename, output_file=test_filename)
 
             assert _get_hash(plaintext_filename) == _get_hash(test_filename)
+            assert os.path.exists(encrypted_filename)
+
+    def test_small_file_remove_original(self):
+        with tempfile.TemporaryDirectory() as tmp_dir:
+            plaintext_filename = os.path.join(tmp_dir, 'plaintext_filename.txt')
+            encrypted_filename = os.path.join(tmp_dir, 'encrypted_filename.txt')
+
+            with open(plaintext_filename, 'wb') as f:
+                f.write(self.plaintext)
+
+            plaintext_hash = _get_hash(plaintext_filename)
+            encrypt_file(self.password,
+                         plaintext_filename,
+                         output_file=encrypted_filename,
+                         remove_original=True)
+
+            assert not os.path.exists(plaintext_filename)
+
+            test_filename = os.path.join(tmp_dir, 'test_filename.txt')
+            decrypt_file(self.password,
+                         encrypted_filename,
+                         output_file=test_filename,
+                         remove_original=True)
+
+            assert plaintext_hash == _get_hash(test_filename)
+            assert not os.path.exists(encrypted_filename)
+
 
     def test_large_file(self):
         with tempfile.TemporaryDirectory() as tmp_dir:

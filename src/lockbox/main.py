@@ -79,7 +79,7 @@ def decrypt(password, cipher_data, outfile=None):
         with open(outfile, 'wb') as f:
             f.write(plaintext)
 
-def encrypt_file(password, input_file, output_file=None):
+def encrypt_file(password, input_file, output_file=None, remove_original=False):
     if not os.path.exists(input_file):
         raise LockBoxException('{} does not exist'.format(input_file))
 
@@ -100,12 +100,15 @@ def encrypt_file(password, input_file, output_file=None):
                 print(encrypted_data.decode('utf-8'))
                 chunk = infile.read(CHUNK_SIZE)
 
+    if output_file and remove_original:
+        os.remove(input_file)
+
 def _split_encrypted_file(infile):
     with open(infile, 'rb') as f:
         for line in f:
             yield line
 
-def decrypt_file(password, encrypted_file, output_file=None):
+def decrypt_file(password, encrypted_file, output_file=None, remove_original=False):
     if not os.path.exists(encrypted_file):
         raise LockBoxException('{} does not exist'.format(encrypted_file))
 
@@ -116,6 +119,9 @@ def decrypt_file(password, encrypted_file, output_file=None):
             for line in file_lines:
                 data = decrypt(password, line)
                 outfile.write(data)
+
+        if remove_original:
+            os.remove(encrypted_file)
     else:
         for line in file_lines:
             data = decrypt(password, line)
@@ -135,7 +141,7 @@ def encrypt_directory(password, directory):
                 continue
 
             output_file = '{}.lockbox'.format(fullpath)
-            encrypt_file(password, fullpath, output_file=output_file)
+            encrypt_file(password, fullpath, output_file=output_file, remove_original=True)
 
 def decrypt_directory(password, directory):
     if not os.path.exists(directory):
@@ -151,4 +157,4 @@ def decrypt_directory(password, directory):
                 continue
 
             output_file = os.path.splitext(fullpath)[0]
-            decrypt_file(password, fullpath, output_file=output_file)
+            decrypt_file(password, fullpath, output_file=output_file, remove_original=True)
