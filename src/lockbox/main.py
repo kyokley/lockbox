@@ -138,4 +138,17 @@ def encrypt_directory(password, directory):
             encrypt_file(password, fullpath, output_file=output_file)
 
 def decrypt_directory(password, directory):
-    pass
+    if not os.path.exists(directory):
+        raise LockBoxException('{} does not exist'.format(directory))
+    if not os.path.isdir(directory):
+        raise LockBoxException('{} is not a directory'.format(directory))
+
+    for root, dirs, files in os.walk(directory):
+        for file in files:
+            fullpath = os.path.join(root, file)
+
+            if os.path.islink(fullpath) or os.path.splitext(fullpath)[1] != '.lockbox':
+                continue
+
+            output_file = os.path.splitext(fullpath)[0]
+            decrypt_file(password, fullpath, output_file=output_file)
