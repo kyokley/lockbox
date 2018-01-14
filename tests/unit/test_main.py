@@ -8,9 +8,9 @@ from lockbox.main import (encrypt,
                           decrypt,
                           LockBoxException,
                           encrypt_file,
-                          _split_encrypted_file,
                           decrypt_file,
                           encrypt_directory,
+                          decrypt_directory,
                           )
 
 class TestEncrypt(object):
@@ -341,18 +341,146 @@ class TestEncryptDirectory(object):
         self.encrypt_file_patcher = mock.patch('lockbox.main.encrypt_file')
         self.mock_encrypt_file = self.encrypt_file_patcher.start()
 
+        self.walk_patcher = mock.patch('lockbox.main.os.walk')
+        self.mock_walk = self.walk_patcher.start()
+
+        self.mock_exists.return_value = True
+        self.mock_isdir.return_value = True
+        self.mock_islink.return_value = False
+
+        self.password = 'password'
+        self.directory = 'test_directory'
+
     def teardown_method(self):
         self.exists_patcher.stop()
         self.isdir_patcher.stop()
         self.islink_patcher.stop()
         self.encrypt_file_patcher.stop()
+        self.walk_patcher.stop()
 
     def test_non_existent_dir_raises(self):
         self.mock_exists.return_value = False
 
         with pytest.raises(LockBoxException):
-            encrypt_directory('password', 'test_dir')
+            encrypt_directory(self.password, self.directory)
 
+        self.mock_exists.assert_called_once_with(self.directory)
         assert not self.mock_isdir.called
         assert not self.mock_islink.called
         assert not self.mock_encrypt_file.called
+
+    def test_not_dir_raises(self):
+        self.mock_isdir.return_value = False
+
+        with pytest.raises(LockBoxException):
+            encrypt_directory(self.password, self.directory)
+
+        self.mock_exists.assert_called_once_with(self.directory)
+        self.mock_isdir.assert_called_once_with(self.directory)
+        assert not self.mock_islink.called
+        assert not self.mock_encrypt_file.called
+
+    def test_encrypt(self):
+        self.mock_walk.return_value = [('root',
+                                        ['dir1', 'dir2'],
+                                        ['file1', 'link1', 'file2'],
+                                        )]
+        self.mock_islink.side_effect = [False, True, False]
+
+        expected = None
+        actual = encrypt_directory(self.password, self.directory)
+
+        assert expected == actual
+        self.mock_exists.assert_called_once_with(self.directory)
+        self.mock_isdir.assert_called_once_with(self.directory)
+        self.mock_islink.assert_has_calls([mock.call('root/file1'),
+                                           mock.call('root/link1'),
+                                           mock.call('root/file2'),
+                                           ])
+        self.mock_encrypt_file.assert_has_calls([mock.call(self.password,
+                                                           'root/file1',
+                                                           output_file='root/file1.lockbox'),
+                                                 mock.call(self.password,
+                                                           'root/file2',
+                                                           output_file='root/file2.lockbox'),
+                                                 ])
+
+class TestDecryptDirectory(object):
+    def setup_method(self):
+        self.exists_patcher = mock.patch('lockbox.main.os.path.exists')
+        self.mock_exists = self.exists_patcher.start()
+
+        self.isdir_patcher = mock.patch('lockbox.main.os.path.isdir')
+        self.mock_isdir = self.isdir_patcher.start()
+
+        self.islink_patcher = mock.patch('lockbox.main.os.path.islink')
+        self.mock_islink = self.islink_patcher.start()
+
+        self.decrypt_file_patcher = mock.patch('lockbox.main.decrypt_file')
+        self.mock_decrypt_file = self.decrypt_file_patcher.start()
+
+        self.walk_patcher = mock.patch('lockbox.main.os.walk')
+        self.mock_walk = self.walk_patcher.start()
+
+        self.mock_exists.return_value = True
+        self.mock_isdir.return_value = True
+        self.mock_islink.return_value = False
+
+        self.password = 'password'
+        self.directory = 'test_directory'
+
+    def teardown_method(self):
+        self.exists_patcher.stop()
+        self.isdir_patcher.stop()
+        self.islink_patcher.stop()
+        self.decrypt_file_patcher.stop()
+        self.walk_patcher.stop()
+
+    def test_non_existent_dir_raises(self):
+        self.mock_exists.return_value = False
+
+        with pytest.raises(LockBoxException):
+            decrypt_directory(self.password, self.directory)
+
+        self.mock_exists.assert_called_once_with(self.directory)
+        assert not self.mock_isdir.called
+        assert not self.mock_islink.called
+        assert not self.mock_decrypt_file.called
+
+    def test_not_dir_raises(self):
+        self.mock_isdir.return_value = False
+
+        with pytest.raises(LockBoxException):
+            decrypt_directory(self.password, self.directory)
+
+        self.mock_exists.assert_called_once_with(self.directory)
+        self.mock_isdir.assert_called_once_with(self.directory)
+        assert not self.mock_islink.called
+        assert not self.mock_decrypt_file.called
+
+    def test_decrypt(self):
+        self.mock_walk.return_value = [('root',
+                                        ['dir1', 'dir2'],
+                                        ['file1.lockbox', 'link1', 'file2.lockbox', 'file3'],
+                                        )]
+        self.mock_islink.side_effect = [False, True, False, False]
+
+        expected = None
+        actual = decrypt_directory(self.password, self.directory)
+
+        assert expected == actual
+        self.mock_exists.assert_called_once_with(self.directory)
+        self.mock_isdir.assert_called_once_with(self.directory)
+        self.mock_islink.assert_has_calls([mock.call('root/file1.lockbox'),
+                                           mock.call('root/link1'),
+                                           mock.call('root/file2.lockbox'),
+                                           mock.call('root/file3'),
+                                           ])
+        self.mock_decrypt_file.assert_has_calls([mock.call(self.password,
+                                                           'root/file1.lockbox',
+                                                           output_file='root/file1'),
+                                                 mock.call(self.password,
+                                                           'root/file2.lockbox',
+                                                           output_file='root/file2'),
+                                                 ])
+

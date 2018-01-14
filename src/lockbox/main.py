@@ -136,3 +136,6 @@ def encrypt_directory(password, directory):
 
             output_file = '{}.lockbox'.format(fullpath)
             encrypt_file(password, fullpath, output_file=output_file)
+
+def decrypt_directory(password, directory):
+    pass
