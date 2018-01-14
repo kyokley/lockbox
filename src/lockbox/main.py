@@ -120,3 +120,19 @@ def decrypt_file(password, encrypted_file, output_file=None):
         for line in file_lines:
             data = decrypt(password, line)
             print(data.decode('utf-8'))
+
+def encrypt_directory(password, directory):
+    if not os.path.exists(directory):
+        raise LockBoxException('{} does not exist'.format(directory))
+    if not os.path.isdir(directory):
+        raise LockBoxException('{} is not a directory'.format(directory))
+
+    for root, dirs, files in os.walk(directory):
+        for file in files:
+            fullpath = os.path.join(root, file)
+
+            if os.path.islink(fullpath):
+                continue
+
+            output_file = '{}.lockbox'.format(fullpath)
+            encrypt_file(password, fullpath, output_file=output_file)
