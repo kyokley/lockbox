@@ -100,7 +100,7 @@ def encrypt_file(password, input_file, output_file=None, remove_original=False):
                 print(encrypted_data.decode('utf-8'))
                 chunk = infile.read(CHUNK_SIZE)
 
-    if output_file and remove_original:
+    if remove_original:
         os.remove(input_file)
 
 def _split_encrypted_file(infile):

@@ -85,7 +85,8 @@ class TestCliEncrypt(object):
         assert not self.mock_encrypt.called
         self.mock_encrypt_file.assert_called_once_with(self.passphrase,
                                                        self.infile,
-                                                       output_file=self.outfile)
+                                                       output_file=self.outfile,
+                                                       remove_original=False)
         assert not self.mock_print.called
 
     def test_input_directory_no_recursive(self):
@@ -180,7 +181,8 @@ class TestCliDecrypt(object):
         assert expected == actual
         self.mock_decrypt_file.assert_called_once_with(self.passphrase,
                                                        self.infile,
-                                                       output_file=self.outfile)
+                                                       output_file=self.outfile,
+                                                       remove_original=False)
         assert not self.mock_print.called
         assert not self.mock_decrypt.called
         assert not self.mock_decrypt_directory.called
