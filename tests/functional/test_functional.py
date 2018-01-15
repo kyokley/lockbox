@@ -6,6 +6,8 @@ from lockbox.main import (_get_fernet,
                           decrypt,
                           encrypt_file,
                           decrypt_file,
+                          encrypt_directory,
+                          decrypt_directory,
                           )
 
 from cryptography.fernet import Fernet
@@ -90,6 +92,26 @@ class TestEncryptFileDecryptFileRoundTrip(object):
             assert plaintext_hash == _get_hash(test_filename)
             assert not os.path.exists(encrypted_filename)
 
+    def test_recursive(self):
+        file_hashes = {}
+        with tempfile.TemporaryDirectory() as tmp_dir:
+
+            for i in range(3):
+                file_path = os.path.join(tmp_dir, 'file{}.txt'.format(i))
+                with open(file_path, 'wb') as f:
+                    f.write('This is file {}'.format(i).encode('utf-8'))
+
+                file_hashes[file_path] = _get_hash(file_path)
+
+            encrypt_directory(self.password, tmp_dir)
+
+            for k, v in file_hashes.items():
+                assert not os.path.exists(k)
+
+            decrypt_directory(self.password, tmp_dir)
+
+            for k, v in file_hashes.items():
+                assert v == _get_hash(k)
 
     def test_large_file(self):
         with tempfile.TemporaryDirectory() as tmp_dir:

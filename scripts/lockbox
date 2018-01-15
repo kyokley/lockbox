@@ -1,12 +1,12 @@
 #!/usr/bin/env python
 """
 Usage:
-    lockbox <cmd> [<input>] [options]
+    lockbox encrypt (--string=STRING | [-] | <input>) [--output=FILE]
+    lockbox decrypt (--string=STRING | [-] | <input>) [--output=FILE]
     lockbox --version
     lockbox --help
 
 Arguments:
-    cmd    encrypt or decrypt
     input  file to be used for input
            specify '-' to use stdin
 
@@ -28,30 +28,19 @@ import sys
 from docopt import docopt
 from blessings import Terminal
 
-from lockbox import (encrypt,
-                     decrypt,
-                     encrypt_file,
-                     decrypt_file,
-                     LockBoxException,
-                     )
+from lockbox import LockBoxException
 from lockbox._version import get_versions
-
+from lockbox.cli import (cli_encrypt,
+                         cli_decrypt)
 
 VERSION = get_versions()['version']
-ENCRYPT = 'encrypt'
-DECRYPT = 'decrypt'
 
 term = Terminal()
 
-def main(cmd, infile, outfile, string=None):
-    if cmd not in (ENCRYPT, DECRYPT):
-        print(term.red('{} is not a valid cmd. Must be either encrypt or decrypt'.format(cmd)))
-        print(__doc__)
-        return
-
-    if string and infile:
-        print(term.red('Cannot define a STRING and provide an input file or stdin data at the same time.'))
-        print(__doc__)
+def main(args):
+    infile = args['<input>']
+    outfile = args['--output']
+    string = args['--string']
 
     if string:
         string = string.encode('utf-8')
@@ -59,30 +48,14 @@ def main(cmd, infile, outfile, string=None):
     stdin_data = None
     if not string and (not infile or infile == '-'):
         stdin_data = sys.stdin.read().encode('utf-8')
+    data = stdin_data or string
 
     passphrase = getpass.getpass('Enter passphrase: ').encode('utf-8')
 
-    if cmd == ENCRYPT:
-        confirm_passphrase = getpass.getpass('Confirm passphrase: ').encode('utf-8')
-
-        if passphrase != confirm_passphrase:
-            print('passphrases do not match')
-            return
-
-        if stdin_data or string:
-            stdout_data = encrypt(passphrase, stdin_data or string, outfile=outfile)
-            if stdout_data:
-                print(stdout_data.decode('utf-8'))
-        else:
-            encrypt_file(passphrase, infile, output_file=outfile)
-    elif cmd == DECRYPT:
-        if stdin_data or string:
-            stdout_data = decrypt(passphrase, stdin_data or string, outfile=outfile)
-            if stdout_data:
-                print(stdout_data.decode('utf-8'))
-        else:
-            decrypt_file(passphrase, infile, output_file=outfile)
-
+    if args['encrypt']:
+        cli_encrypt(passphrase, infile, outfile, data=data)
+    elif args['decrypt']:
+        cli_decrypt(passphrase, infile, outfile, data=data)
 
 if __name__ == '__main__':
     args = docopt(__doc__, version=VERSION)
@@ -90,12 +63,7 @@ if __name__ == '__main__':
     if args['--version']:
         print(VERSION)
     else:
-        cmd = args['<cmd>'].lower()
-        infile = args['<input>']
-        outfile = args['--output']
-        string = args['--string']
-
         try:
-            main(cmd, infile, outfile, string=string)
+            main(args)
         except LockBoxException as e:
             print(term.red(str(e)))
