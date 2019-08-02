@@ -13,10 +13,12 @@ RUN echo 'export PATH=$PATH:/root/.poetry/bin' >> /root/.bashrc
 RUN curl -sSL https://raw.githubusercontent.com/sdispater/poetry/master/get-poetry.py | python
 RUN pip install -U pip
 
-WORKDIR /code
 COPY . /code
+WORKDIR /code
 
 RUN /bin/bash -c "/root/.poetry/bin/poetry install ${REQS}"
 RUN python setup.py install
+
+WORKDIR /files
 
 ENTRYPOINT ["lockbox"]
