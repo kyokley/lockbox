@@ -75,7 +75,8 @@ def main(args):
                     remove_original=remove_original,
                     force=force)
 
-if __name__ == '__main__':
+
+def run():
     args = docopt(__doc__, version=VERSION)
 
     if args['--version']:
@@ -87,3 +88,6 @@ if __name__ == '__main__':
             print(term.red(str(e)))
         except KeyboardInterrupt:
             print(term.red('Aborted'))
+
+if __name__ == '__main__':
+    run()

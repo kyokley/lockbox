@@ -10,4 +10,4 @@ publish: build
 	docker push kyokley/lockbox
 
 shell:
-	docker run --rm -it --entrypoint /bin/bash kyokley/lockbox
+	docker run --rm -it --entrypoint /bin/bash -v $$(pwd):/code kyokley/lockbox
