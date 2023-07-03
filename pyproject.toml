@@ -6,11 +6,11 @@ authors = ["Kevin Yokley <kyokley2@gmail.com>"]
 license = "MIT"
 
 [tool.poetry.dependencies]
-python = "^3.6"
+python = "^3.11"
 
 [tool.poetry.dev-dependencies]
-mock = "^3.0"
-pytest = "^5.0"
+mock = "^5.0"
+pytest = "^7.0"
 bandit = "^1.6"
 bpython = "^0.18.0"
 pdbpp = "^0.10.0"
