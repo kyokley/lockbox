@@ -11,3 +11,6 @@ publish: build
 
 shell:
 	docker run --rm -it --entrypoint /bin/bash -v $$(pwd):/code kyokley/lockbox
+
+test: build-dev
+	docker run --rm -it --entrypoint pytest -v $$(pwd):/code kyokley/lockbox
