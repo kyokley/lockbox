@@ -10,7 +10,7 @@ import qrcode
 
 SALT_LENGTH = 16
 KEY_LENGTH = 32
-HASH_ITERATIONS = 100000
+HASH_ITERATIONS = 700000
 
 CHUNK_SIZE = 1024 * 1024 * 10 # 10 MB
 
@@ -43,7 +43,8 @@ def encrypt(password, plain_data, outfile=None):
     cipher_data = fernet.encrypt(plain_data)
 
     encoded_salt = base64.urlsafe_b64encode(salt)
-
+    # The string concatenation below looks weird but is required to interpolate
+    # and receive back a byte string
     output_data = encoded_salt + b'$' + cipher_data
 
     if not outfile:

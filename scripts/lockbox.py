@@ -60,22 +60,23 @@ def main(args):
 
     if args['encrypt']:
         cli_encrypt(passphrase,
-                    infile,
-                    outfile,
+                    infile=infile,
+                    outfile=outfile,
                     data=data,
                     recursive=recursive,
                     remove_original=remove_original,
                     force=force)
     elif args['decrypt']:
         cli_decrypt(passphrase,
-                    infile,
-                    outfile,
+                    infile=infile,
+                    outfile=outfile,
                     data=data,
                     recursive=recursive,
                     remove_original=remove_original,
                     force=force)
 
-if __name__ == '__main__':
+
+def run():
     args = docopt(__doc__, version=VERSION)
 
     if args['--version']:
@@ -87,3 +88,6 @@ if __name__ == '__main__':
             print(term.red(str(e)))
         except KeyboardInterrupt:
             print(term.red('Aborted'))
+
+if __name__ == '__main__':
+    run()
