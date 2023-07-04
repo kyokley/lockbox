@@ -39,10 +39,11 @@ ENTRYPOINT ["lockbox"]
 
 FROM base AS final
 
-RUN ${POETRY_VENV}/bin/poetry install --without dev
-
 WORKDIR /files
 COPY . /code
+
+RUN ${POETRY_VENV}/bin/poetry install --without dev
+
 
 FROM base AS dev
 
