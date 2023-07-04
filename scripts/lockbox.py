@@ -60,16 +60,16 @@ def main(args):
 
     if args['encrypt']:
         cli_encrypt(passphrase,
-                    infile,
-                    outfile,
+                    infile=infile,
+                    outfile=outfile,
                     data=data,
                     recursive=recursive,
                     remove_original=remove_original,
                     force=force)
     elif args['decrypt']:
         cli_decrypt(passphrase,
-                    infile,
-                    outfile,
+                    infile=infile,
+                    outfile=outfile,
                     data=data,
                     recursive=recursive,
                     remove_original=remove_original,

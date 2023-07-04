@@ -18,30 +18,41 @@ RUN ${POETRY_VENV}/bin/pip install --upgrade pip && \
 RUN ${POETRY_VENV}/bin/pip install poetry
 
 WORKDIR /code
-COPY . /code
+COPY pyproject.toml poetry.lock /code/
 
-RUN ${POETRY_VENV}/bin/poetry install --without dev
+RUN ${POETRY_VENV}/bin/poetry install --no-root --without dev
 
-ENTRYPOINT ["lockbox"]
-
-FROM ${BASE_IMAGE} AS final
+FROM ${BASE_IMAGE} AS base
 ENV PYTHONUNBUFFERED 1
 ENV PYTHONDONTWRITEBYTECODE 1
 ENV VIRTUAL_ENV=/venv
 ENV PATH="$VIRTUAL_ENV/bin:$PATH"
-
-RUN apt update && apt upgrade -y
-
-WORKDIR /code
-COPY . /code
-
-COPY --from=builder ${VIRTUAL_ENV} ${VIRTUAL_ENV}
-
-FROM final AS dev
 ENV POETRY_VENV=/poetry_venv
 ENV PATH="$PATH:$POETRY_VENV/bin"
 
-RUN apt install -y g++
+RUN apt-get update && apt-get upgrade -y
 
+COPY --from=builder ${VIRTUAL_ENV} ${VIRTUAL_ENV}
 COPY --from=builder ${POETRY_VENV} ${POETRY_VENV}
+
+ENTRYPOINT ["lockbox"]
+
+FROM base AS final
+
+RUN ${POETRY_VENV}/bin/poetry install --without dev
+
+WORKDIR /files
+COPY . /code
+
+FROM base AS dev
+
+RUN apt-get install -y g++
+
+WORKDIR /code
+COPY pyproject.toml poetry.lock /code/
+RUN ${POETRY_VENV}/bin/poetry install --no-root
+
+COPY . /code
 RUN ${POETRY_VENV}/bin/poetry install
+
+WORKDIR /files
