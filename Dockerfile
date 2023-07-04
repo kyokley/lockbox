@@ -35,21 +35,22 @@ RUN apt-get update && apt-get upgrade -y
 COPY --from=builder ${VIRTUAL_ENV} ${VIRTUAL_ENV}
 COPY --from=builder ${POETRY_VENV} ${POETRY_VENV}
 
+WORKDIR /code
+
 ENTRYPOINT ["lockbox"]
 
 FROM base AS final
 
-WORKDIR /files
 COPY . /code
 
 RUN ${POETRY_VENV}/bin/poetry install --without dev
 
+WORKDIR /files
 
 FROM base AS dev
 
 RUN apt-get install -y g++
 
-WORKDIR /code
 COPY pyproject.toml poetry.lock /code/
 RUN ${POETRY_VENV}/bin/poetry install --no-root
 
