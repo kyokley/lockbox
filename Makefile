@@ -13,4 +13,4 @@ shell:
 	docker run --rm -it --entrypoint /bin/bash -v $$(pwd):/code kyokley/lockbox
 
 tests: build-dev
-	docker run --rm -it --entrypoint pytest -v $$(pwd):/code --workdir /code kyokley/lockbox
+	docker run --rm -t --entrypoint pytest -v $$(pwd):/code --workdir /code kyokley/lockbox
