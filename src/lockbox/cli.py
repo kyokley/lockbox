@@ -9,13 +9,13 @@ from lockbox import (encrypt,
                      encrypt_directory,
                      decrypt_directory,
                      LockBoxException,
+                     LOCKBOX_SUFFIX,
                      )
 
 from blessings import Terminal
 
 term = Terminal()
 YES = ('y', 'yes')
-LOCKBOX_SUFFIX = '.lockbox'
 
 def cli_encrypt(passphrase,
                 infile=None,
