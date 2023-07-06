@@ -8,10 +8,6 @@ from lockbox.main import (encrypt,
                           SALT_LENGTH,
                           decrypt,
                           LockBoxException,
-                          encrypt_file,
-                          decrypt_file,
-                          encrypt_directory,
-                          decrypt_directory,
                           )
 
 class TestEncrypt:
