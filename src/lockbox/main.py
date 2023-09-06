@@ -1,12 +1,16 @@
 import base64
 import os
+import secrets
 
+from pathlib import Path
 from cryptography.fernet import Fernet, InvalidToken
 from cryptography.hazmat.backends import default_backend
 from cryptography.hazmat.primitives import hashes
 from cryptography.hazmat.primitives.kdf.pbkdf2 import PBKDF2HMAC
 
 import qrcode
+
+LOCKBOX_SUFFIX = '.lockbox'
 
 SALT_LENGTH = 16
 KEY_LENGTH = 32
@@ -38,7 +42,7 @@ def encrypt(password, plain_data, outfile=None):
     if not isinstance(plain_data, bytes):
         plain_data = plain_data.encode('utf-8')
 
-    salt = os.urandom(SALT_LENGTH)
+    salt = secrets.token_bytes(SALT_LENGTH)
     fernet = _get_fernet(password, salt)
     cipher_data = fernet.encrypt(plain_data)
 
@@ -50,7 +54,7 @@ def encrypt(password, plain_data, outfile=None):
     if not outfile:
         return output_data
     else:
-        if os.path.splitext(outfile)[1] in QR_CODE_EXTENSIONS:
+        if outfile.suffix in QR_CODE_EXTENSIONS:
             img = qrcode.make(output_data)
             img.save(outfile)
         else:
@@ -81,7 +85,7 @@ def decrypt(password, cipher_data, outfile=None):
             f.write(plaintext)
 
 def encrypt_file(password, input_file, output_file=None, remove_original=False):
-    if not os.path.exists(input_file):
+    if not input_file.exists():
         raise LockBoxException('{} does not exist'.format(input_file))
 
     with open(input_file, 'rb') as infile:
@@ -102,7 +106,7 @@ def encrypt_file(password, input_file, output_file=None, remove_original=False):
                 chunk = infile.read(CHUNK_SIZE)
 
     if remove_original:
-        os.remove(input_file)
+        input_file.unlink()
 
 def _split_encrypted_file(infile):
     with open(infile, 'rb') as f:
@@ -110,7 +114,7 @@ def _split_encrypted_file(infile):
             yield line
 
 def decrypt_file(password, encrypted_file, output_file=None, remove_original=False):
-    if not os.path.exists(encrypted_file):
+    if not encrypted_file.exists():
         raise LockBoxException('{} does not exist'.format(encrypted_file))
 
     file_lines = _split_encrypted_file(encrypted_file)
@@ -122,40 +126,40 @@ def decrypt_file(password, encrypted_file, output_file=None, remove_original=Fal
                 outfile.write(data)
 
         if remove_original:
-            os.remove(encrypted_file)
+            encrypted_file.unlink()
     else:
         for line in file_lines:
             data = decrypt(password, line)
             print(data.decode('utf-8'))
 
 def encrypt_directory(password, directory):
-    if not os.path.exists(directory):
-        raise LockBoxException('{} does not exist'.format(directory))
-    if not os.path.isdir(directory):
-        raise LockBoxException('{} is not a directory'.format(directory))
+    if not directory.exists():
+        raise LockBoxException(f'{directory} does not exist')
+    if not directory.is_dir():
+        raise LockBoxException(f'{directory} is not a directory')
 
     for root, dirs, files in os.walk(directory):
         for file in files:
-            fullpath = os.path.join(root, file)
+            fullpath = Path(root) / file
 
-            if os.path.islink(fullpath):
+            if fullpath.is_symlink():
                 continue
 
-            output_file = '{}.lockbox'.format(fullpath)
+            output_file = fullpath.parent / f'{fullpath.name}{LOCKBOX_SUFFIX}'
             encrypt_file(password, fullpath, output_file=output_file, remove_original=True)
 
 def decrypt_directory(password, directory):
-    if not os.path.exists(directory):
-        raise LockBoxException('{} does not exist'.format(directory))
-    if not os.path.isdir(directory):
-        raise LockBoxException('{} is not a directory'.format(directory))
+    if not directory.exists():
+        raise LockBoxException(f'{directory} does not exist')
+    if not directory.is_dir():
+        raise LockBoxException(f'{directory} is not a directory')
 
     for root, dirs, files in os.walk(directory):
         for file in files:
-            fullpath = os.path.join(root, file)
+            fullpath = Path(root) / file
 
-            if os.path.islink(fullpath) or os.path.splitext(fullpath)[1] != '.lockbox':
+            if fullpath.is_symlink() or fullpath.suffix != LOCKBOX_SUFFIX:
                 continue
 
-            output_file = os.path.splitext(fullpath)[0]
+            output_file = fullpath.parent / fullpath.stem
             decrypt_file(password, fullpath, output_file=output_file, remove_original=True)
