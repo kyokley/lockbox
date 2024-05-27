@@ -1,40 +1,24 @@
-# SPDX-FileCopyrightText: 2021 Serokell <https://serokell.io/>
-#
-# SPDX-License-Identifier: CC0-1.0
-
+# file: flake.nix
 {
   description = "Easy cryptographic functions";
 
-  inputs = {
-    nixpkgs.url = "github:NixOS/nixpkgs";
-    flake-utils.url = "github:numtide/flake-utils";
-  };
+  inputs.nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";
+  inputs.poetry2nix.url = "github:nix-community/poetry2nix";
 
-  outputs = { self, nixpkgs, flake-utils }:
-    flake-utils.lib.eachDefaultSystem (system:
-      let
-        pkgs = nixpkgs.legacyPackages.${system};
-
-        customOverrides = self: super: {
-          # Overrides go here
-        };
-
-        app = pkgs.poetry2nix.mkPoetryApplication {
-          projectDir = ./.;
-          overrides =
-            [ pkgs.poetry2nix.defaultPoetryOverrides customOverrides ];
-        };
-
-        # DON'T FORGET TO PUT YOUR PACKAGE NAME HERE, REMOVING `throw`
-        packageName = "lockbox";
-      in {
-        packages.${packageName} = app;
-
-        defaultPackage = self.packages.${system}.${packageName};
-
-        devShell = pkgs.mkShell {
-          buildInputs = with pkgs; [ poetry ];
-          inputsFrom = builtins.attrValues self.packages.${system};
-        };
-      });
+  outputs = { self, nixpkgs, poetry2nix }:
+    let
+      system = "aarch64-darwin";
+      pkgs = nixpkgs.legacyPackages.${system};
+      # create a custom "mkPoetryApplication" API function that under the hood uses
+      # the packages and versions (python3, poetry etc.) from our pinned nixpkgs above:
+      inherit (poetry2nix.lib.mkPoetry2Nix { inherit pkgs; }) mkPoetryApplication;
+      myPythonApp = mkPoetryApplication { projectDir = ./.; };
+    in
+    {
+      apps.${system}.default = {
+        type = "app";
+        # replace <script> with the name in the [tool.poetry.scripts] section of your pyproject.toml
+        program = "${myPythonApp}/bin/lockbox";
+      };
+    };
 }
