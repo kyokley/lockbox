@@ -24,6 +24,7 @@ Without -o FILE given, lockbox will display data to stdout
 Be careful using the -s STRING option on the command line as your unencrypted plaintext may be stored in your history.
 Also, when using the -s option, any data provided through stdin will be ignored.
 """
+
 import getpass
 import sys
 
@@ -32,53 +33,57 @@ from blessings import Terminal
 
 from src.lockbox import LockBoxException
 from src.lockbox._version import get_versions
-from src.lockbox.cli import (cli_encrypt,
-                         cli_decrypt)
+from src.lockbox.cli import cli_encrypt, cli_decrypt
 
-VERSION = get_versions()['version']
+VERSION = get_versions()["version"]
 
 term = Terminal()
 
+
 def main(args):
-    infile = args['<INPUT>']
-    outfile = args['--output']
-    string = args['--string']
-    recursive = args['--recursive']
-    remove_original = args['--remove-original']
-    force = args['--force']
+    infile = args["<INPUT>"]
+    outfile = args["--output"]
+    string = args["--string"]
+    recursive = args["--recursive"]
+    remove_original = args["--remove-original"]
+    force = args["--force"]
 
     if string:
-        string = string.encode('utf-8')
+        string = string.encode("utf-8")
 
     stdin_data = None
-    if not string and (not infile or infile == '-'):
-        stdin_data = sys.stdin.read().encode('utf-8')
+    if not string and (not infile or infile == "-"):
+        stdin_data = sys.stdin.read().encode("utf-8")
     data = stdin_data or string
 
-    passphrase = getpass.getpass('Enter passphrase: ').encode('utf-8')
+    passphrase = getpass.getpass("Enter passphrase: ").encode("utf-8")
 
-    if args['encrypt']:
-        cli_encrypt(passphrase,
-                    infile=infile,
-                    outfile=outfile,
-                    data=data,
-                    recursive=recursive,
-                    remove_original=remove_original,
-                    force=force)
-    elif args['decrypt']:
-        cli_decrypt(passphrase,
-                    infile=infile,
-                    outfile=outfile,
-                    data=data,
-                    recursive=recursive,
-                    remove_original=remove_original,
-                    force=force)
+    if args["encrypt"]:
+        cli_encrypt(
+            passphrase,
+            infile=infile,
+            outfile=outfile,
+            data=data,
+            recursive=recursive,
+            remove_original=remove_original,
+            force=force,
+        )
+    elif args["decrypt"]:
+        cli_decrypt(
+            passphrase,
+            infile=infile,
+            outfile=outfile,
+            data=data,
+            recursive=recursive,
+            remove_original=remove_original,
+            force=force,
+        )
 
 
 def run():
     args = docopt(__doc__, version=VERSION)
 
-    if args['--version']:
+    if args["--version"]:
         print(VERSION)
     else:
         try:
@@ -86,7 +91,8 @@ def run():
         except LockBoxException as e:
             print(term.red(str(e)))
         except KeyboardInterrupt:
-            print(term.red('Aborted'))
+            print(term.red("Aborted"))
 
-if __name__ == '__main__':
+
+if __name__ == "__main__":
     run()
