@@ -1,4 +1,3 @@
-#!/usr/bin/env python
 """
 Usage:
     lockbox encrypt (--string=STRING | [-] | <INPUT> [--remove-original]) [--output=FILE] [--recursive] [--force]
@@ -31,9 +30,9 @@ import sys
 from docopt import docopt
 from blessings import Terminal
 
-from lockbox import LockBoxException
-from lockbox._version import get_versions
-from lockbox.cli import (cli_encrypt,
+from src.lockbox import LockBoxException
+from src.lockbox._version import get_versions
+from src.lockbox.cli import (cli_encrypt,
                          cli_decrypt)
 
 VERSION = get_versions()['version']

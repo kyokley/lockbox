@@ -1,1 +1,1 @@
-from lockbox.main import *  # noqa
+from src.lockbox.main import *  # noqa

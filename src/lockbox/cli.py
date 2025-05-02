@@ -2,7 +2,7 @@ import os
 import getpass
 from pathlib import Path
 
-from lockbox import (encrypt,
+from src.lockbox import (encrypt,
                      decrypt,
                      encrypt_file,
                      decrypt_file,
