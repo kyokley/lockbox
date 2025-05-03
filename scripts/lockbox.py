@@ -1,34 +1,7 @@
-"""
-Usage:
-    lockbox encrypt (--string=STRING | [-] | <INPUT> [--remove-original]) [--output=FILE] [--recursive] [--force]
-    lockbox decrypt (--string=STRING | [-] | <INPUT> [--remove-original]) [--output=FILE] [--recursive] [--force]
-    lockbox --version
-    lockbox --help
-
-Arguments:
-    INPUT  file or directory to be used for input
-           specify '-' to use stdin
-
-Options:
-    -s STRING --string=STRING   STRING to be used as the input data for encrypting/decrypting
-    -o FILE --output=FILE       file to be used for outputted data
-                                specifying an output file with a '.png'
-                                extension will write a QR code to FILE
-    -r --recursive              recursively encrypt all files in the directory given as input
-    --remove-original           delete input file after encrypt/decrypt is completed
-    -f --force                  ignore warnings and force action
-    -h --help                   display this help
-
-Without -o FILE given, lockbox will display data to stdout
-
-Be careful using the -s STRING option on the command line as your unencrypted plaintext may be stored in your history.
-Also, when using the -s option, any data provided through stdin will be ignored.
-"""
-
 import getpass
 import sys
+import argparse
 
-from docopt import docopt
 from blessings import Terminal
 
 from src.lockbox import LockBoxException
@@ -39,8 +12,96 @@ VERSION = get_versions()["version"]
 
 term = Terminal()
 
+parser = argparse.ArgumentParser(
+    prog="lockbox",
+    description="Simple cryptographic CLI",
+)
+parser.add_argument("--version", action="store_true")
 
-def main(args):
+subparsers = parser.add_subparsers()
+encrypt_parser = subparsers.add_parser(
+    "encrypt",
+    description="Encrypt data",
+    epilog="""
+Be careful using the -s STRING option on the command line as your unencrypted plaintext may be stored in your history.
+Also, when using the -s option, any data provided through stdin will be ignored.
+        """,
+)
+encrypt_parser.add_argument(
+    "-s",
+    "--string",
+    help="string to be used as the input data for encrypting",
+)
+encrypt_parser.add_argument(
+    "-o",
+    "--output",
+    help="file to be used for outputted data, specifying an output file with a '.png' extension will write a QR code",
+)
+encrypt_parser.add_argument(
+    "input",
+    help="file or directory to be used for input, specify '-' to use stdin",
+)
+encrypt_parser.add_argument(
+    "-r",
+    "--recursive",
+    help="recursively encrypt all files in the directory given as input",
+    action="store_true",
+)
+encrypt_parser.add_argument(
+    "--remove-original",
+    help="delete input file after encryption is completed",
+    action="store_true",
+)
+encrypt_parser.add_argument(
+    "-f",
+    "--force",
+    help="ignore warnings and force action",
+    action="store_true",
+)
+
+decrypt_parser = subparsers.add_parser(
+    "decrypt",
+    description="Decrypt data",
+    epilog="""
+Be careful using the -s STRING option on the command line as your unencrypted plaintext may be stored in your history.
+Also, when using the -s option, any data provided through stdin will be ignored.
+        """,
+)
+decrypt_parser.add_argument(
+    "-s",
+    "--string",
+    help="string to be used as the input data for decrypting",
+)
+decrypt_parser.add_argument(
+    "-o",
+    "--output",
+    help="file to be used for outputted data, specifying an output file with a '.png' extension will write a QR code",
+)
+decrypt_parser.add_argument(
+    "input",
+    help="file or directory to be used for input, specify '-' to use stdin",
+)
+decrypt_parser.add_argument(
+    "-r",
+    "--recursive",
+    help="recursively decrypt all files in the directory given as input",
+    action="store_true",
+)
+decrypt_parser.add_argument(
+    "--remove-original",
+    help="delete input file after decryption is completed",
+    action="store_true",
+)
+decrypt_parser.add_argument(
+    "-f",
+    "--force",
+    help="ignore warnings and force action",
+    action="store_true",
+)
+args = parser.parse_args()
+
+
+def main():
     infile = args["<INPUT>"]
     outfile = args["--output"]
     string = args["--string"]
@@ -81,17 +142,12 @@ def main(args):
 
 
 def run():
-    args = docopt(__doc__, version=VERSION)
-
-    if args["--version"]:
-        print(VERSION)
-    else:
-        try:
-            main(args)
-        except LockBoxException as e:
-            print(term.red(str(e)))
-        except KeyboardInterrupt:
-            print(term.red("Aborted"))
+    try:
+        main()
+    except LockBoxException as e:
+        print(term.red(str(e)))
+    except KeyboardInterrupt:
+        print(term.red("Aborted"))
 
 
 if __name__ == "__main__":

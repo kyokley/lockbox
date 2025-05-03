@@ -5,6 +5,7 @@
   env = {
     GREET = "lockbox";
     USE_HOST_NET = 1;
+    PYTHONPATH = ".";
   };
 
   # https://devenv.sh/packages/

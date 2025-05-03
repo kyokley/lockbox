@@ -7,7 +7,6 @@ requires-python = ">=3.12"
 dependencies = [
     "blessings>=1.7",
     "cryptography>=44.0.2",
-    "docopt>=0.6.2",
     "qrcode-terminal>=0.8",
 ]
 
