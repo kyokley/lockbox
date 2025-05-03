@@ -18,5 +18,4 @@ dev = [
     "pdbpp>=0.11.6",
     "pytest>=8.3.5",
     "pytest-mock>=3.14.0",
-    "ruff>=0.11.7",
 ]

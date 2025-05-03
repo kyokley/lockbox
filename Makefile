@@ -1,7 +1,7 @@
 .PHONY: build build-dev publish
 
 build:
-	docker build --target final -t kyokley/lockbox .
+	docker build -t kyokley/lockbox .
 
 build-dev:
 	docker build --target dev -t kyokley/lockbox .

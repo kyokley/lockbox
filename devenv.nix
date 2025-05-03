@@ -2,7 +2,10 @@
 
 {
   # https://devenv.sh/basics/
-  env.GREET = "lockbox";
+  env = {
+    GREET = "lockbox";
+    USE_HOST_NET = 1;
+  };
 
   # https://devenv.sh/packages/
   packages = [];
@@ -22,9 +25,14 @@
   # services.postgres.enable = true;
 
   # https://devenv.sh/scripts/
-  scripts.hello.exec = ''
-    echo Welcome to $GREET
-  '';
+  scripts = {
+    hello.exec = ''
+      echo Welcome to $GREET
+    '';
+    build.exec = ''
+      docker build -t kyokley/lockbox $(test $USE_HOST_NET -eq 1 && echo "--network=host") .
+    '';
+  };
 
   enterShell = ''
     hello
