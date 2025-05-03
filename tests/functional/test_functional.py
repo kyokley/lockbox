@@ -1,7 +1,7 @@
 import pytest
 import os
 import hashlib
-from lockbox.main import (
+from src.lockbox.main import (
     _get_fernet,
     encrypt,
     decrypt,

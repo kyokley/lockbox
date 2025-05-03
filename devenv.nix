@@ -33,9 +33,12 @@
     build.exec = ''
       docker build -t kyokley/lockbox $(test $USE_HOST_NET -eq 1 && echo "--network=host") .
     '';
+    build-dev.exec = ''
+      docker build --target=dev -t kyokley/lockbox $(test $USE_HOST_NET -eq 1 && echo "--network=host") .
+    '';
     tests.exec = ''
-      build
-      docker run --rm -t --entrypoint pytest -v $$(pwd):/code --workdir /code kyokley/lockbox
+      build-dev
+      docker run --rm -t --entrypoint uv -v $(pwd):/code --workdir /code kyokley/lockbox run pytest
     '';
   };
 
@@ -52,8 +55,7 @@
   # https://devenv.sh/tests/
   enterTest = ''
     echo "Running tests"
-    build
-    test
+    tests
   '';
 
   # https://devenv.sh/git-hooks/

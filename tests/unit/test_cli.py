@@ -1,7 +1,7 @@
 import pytest
 
 from pathlib import Path
-from lockbox.cli import (
+from src.lockbox.cli import (
     cli_encrypt,
     cli_decrypt,
 )
@@ -12,11 +12,11 @@ class TestCliEncrypt:
     def setUp(self, mocker, temp_dir):
         self.temp_dir = temp_dir
 
-        self.mock_getpass = mocker.patch("lockbox.cli.getpass.getpass")
-        self.mock_encrypt = mocker.patch("lockbox.cli.encrypt")
-        self.mock_encrypt_file = mocker.patch("lockbox.cli.encrypt_file")
-        self.mock_encrypt_directory = mocker.patch("lockbox.cli.encrypt_directory")
-        self.mock_print = mocker.patch("lockbox.cli.print")
+        self.mock_getpass = mocker.patch("src.lockbox.cli.getpass.getpass")
+        self.mock_encrypt = mocker.patch("src.lockbox.cli.encrypt")
+        self.mock_encrypt_file = mocker.patch("src.lockbox.cli.encrypt_file")
+        self.mock_encrypt_directory = mocker.patch("src.lockbox.cli.encrypt_directory")
+        self.mock_print = mocker.patch("src.lockbox.cli.print")
 
         self.passphrase = b"test_passphrase"
         self.mock_getpass.return_value = "test_passphrase"
@@ -43,14 +43,14 @@ class TestCliDecrypt:
     def setUp(self, mocker, temp_dir):
         self.temp_dir = temp_dir
 
-        self.mock_getpass = mocker.patch("lockbox.cli.getpass.getpass")
-        self.mock_decrypt = mocker.patch("lockbox.cli.decrypt")
+        self.mock_getpass = mocker.patch("src.lockbox.cli.getpass.getpass")
+        self.mock_decrypt = mocker.patch("src.lockbox.cli.decrypt")
 
-        self.mock_decrypt_file = mocker.patch("lockbox.cli.decrypt_file")
+        self.mock_decrypt_file = mocker.patch("src.lockbox.cli.decrypt_file")
 
-        self.mock_decrypt_directory = mocker.patch("lockbox.cli.decrypt_directory")
+        self.mock_decrypt_directory = mocker.patch("src.lockbox.cli.decrypt_directory")
 
-        self.mock_print = mocker.patch("lockbox.cli.print")
+        self.mock_print = mocker.patch("src.lockbox.cli.print")
 
         self.passphrase = b"test_passphrase"
         self.mock_getpass.return_value = "test_passphrase"

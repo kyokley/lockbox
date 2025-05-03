@@ -4,7 +4,7 @@ import pytest
 from pathlib import Path
 from cryptography.fernet import InvalidToken
 
-from lockbox.main import (
+from src.lockbox.main import (
     encrypt,
     SALT_LENGTH,
     decrypt,
@@ -15,22 +15,22 @@ from lockbox.main import (
 class TestEncrypt:
     @pytest.fixture(autouse=True)
     def setUp(self, mocker):
-        self.mock_token_bytes = mocker.patch("lockbox.main.secrets.token_bytes")
+        self.mock_token_bytes = mocker.patch("src.lockbox.main.secrets.token_bytes")
         self.mock_token_bytes.return_value = (
             b"0" * SALT_LENGTH
         )  #  This is a really terrible salt
 
-        self.mock_get_fernet = mocker.patch("lockbox.main._get_fernet")
+        self.mock_get_fernet = mocker.patch("src.lockbox.main._get_fernet")
         self.mock_get_fernet.return_value.encrypt.return_value = b"test_cipher_data"
 
         self.mock_urlsafe_b64encode = mocker.patch(
-            "lockbox.main.base64.urlsafe_b64encode"
+            "src.lockbox.main.base64.urlsafe_b64encode"
         )
         self.mock_urlsafe_b64encode.return_value = b"test_encoded_salt"
 
-        self.mock_qrcode = mocker.patch("lockbox.main.qrcode")
+        self.mock_qrcode = mocker.patch("src.lockbox.main.qrcode")
 
-        self.mock_open = mocker.patch("lockbox.main.open", mock.mock_open())
+        self.mock_open = mocker.patch("src.lockbox.main.open", mock.mock_open())
 
         self.password = b"password"
         self.plaintext = b"plaintext"
@@ -155,15 +155,15 @@ class TestEncrypt:
 class TestDecrypt:
     @pytest.fixture(autouse=True)
     def setUp(self, mocker):
-        self.mock_get_fernet = mocker.patch("lockbox.main._get_fernet")
+        self.mock_get_fernet = mocker.patch("src.lockbox.main._get_fernet")
         self.mock_get_fernet.return_value.decrypt.return_value = b"test_plaintext_data"
 
         self.mock_urlsafe_b64decode = mocker.patch(
-            "lockbox.main.base64.urlsafe_b64decode"
+            "src.lockbox.main.base64.urlsafe_b64decode"
         )
         self.mock_urlsafe_b64decode.return_value = b"test_decoded_salt"
 
-        self.mock_open = mocker.patch("lockbox.main.open", mock.mock_open())
+        self.mock_open = mocker.patch("src.lockbox.main.open", mock.mock_open())
 
         self.password = b"password"
         self.ciphertext = b"encoded_salt$ciphertext"
