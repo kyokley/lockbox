@@ -21,8 +21,15 @@ jobs:
         id: buildx
         uses: docker/setup-buildx-action@master
 
-      - name: Run tests
-        run: make tests
+      - uses: cachix/install-nix-action@v30
+      - uses: cachix/cachix-action@v14
+        with:
+          name: devenv
+
+      - name: Install devenv.sh
+        run: nix profile install nixpkgs#devenv
+      - name: Build the devenv shell and run any pre-commit hooks
+        run: devenv test
 
       - name: Login to DockerHub
         if: github.event_name != 'pull_request'
