@@ -106,6 +106,10 @@ args = parser.parse_args()
 
 
 def main():
+    if args.subcommand not in ("encrypt", "decrypt"):
+        print(f"lockbox {VERSION}")
+        return
+
     infile = args.input
     outfile = args.output
     string = args.string

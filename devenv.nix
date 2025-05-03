@@ -40,6 +40,9 @@
       build-dev
       docker run --rm -t --entrypoint uv -v $(pwd):/code --workdir /code kyokley/lockbox run pytest
     '';
+    lockbox.exec = ''
+      uv run python scripts/lockbox.py "$@"
+    '';
   };
 
   enterShell = ''

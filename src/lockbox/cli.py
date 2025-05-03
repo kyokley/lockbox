@@ -103,7 +103,6 @@ def cli_decrypt(
             )
 
     _validate_files(infile, outfile, force)
-    _confirm_passphrase(passphrase)
 
     if data:
         stdout_data = decrypt(passphrase, data, outfile=outfile)
