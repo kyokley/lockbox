@@ -17,3 +17,6 @@ WORKDIR /code
 COPY . /code
 
 ENTRYPOINT ["uv", "run", "--no-sync", "python", "scripts/lockbox.py"]
+
+FROM base AS dev
+RUN uv sync --frozen

@@ -33,6 +33,10 @@
     build.exec = ''
       docker build -t kyokley/lockbox $(test $USE_HOST_NET -eq 1 && echo "--network=host") .
     '';
+    tests.exec = ''
+      build
+      docker run --rm -t --entrypoint pytest -v $$(pwd):/code --workdir /code kyokley/lockbox
+    '';
   };
 
   enterShell = ''
@@ -48,6 +52,8 @@
   # https://devenv.sh/tests/
   enterTest = ''
     echo "Running tests"
+    build
+    test
   '';
 
   # https://devenv.sh/git-hooks/
