@@ -120,7 +120,7 @@ def main():
     if string:
         string = string.encode("utf-8")
 
-    stdin_data = None
+    stdin_data = ""
     if not string and (not infile or infile == "-"):
         stdin_data = sys.stdin.read().encode("utf-8")
     data = stdin_data or string
