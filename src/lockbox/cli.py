@@ -94,7 +94,8 @@ def cli_decrypt(
 
     if outfile:
         outfile = Path(outfile)
-    else:
+
+    if not recursive:
         if infile and infile.suffix == LOCKBOX_SUFFIX:
             outfile = infile.parent / infile.stem
         elif not data:
@@ -102,7 +103,7 @@ def cli_decrypt(
                 f"Could not automatically determine output file name for {infile}"
             )
 
-    _validate_files(infile, outfile, force)
+        _validate_files(infile, outfile, force)
 
     if data:
         stdout_data = decrypt(passphrase, data, outfile=outfile)
