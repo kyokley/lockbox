@@ -31,7 +31,7 @@
       echo Welcome to $GREET
     '';
     build.exec = ''
-      docker build -t kyokley/lockbox $(test $USE_HOST_NET -eq 1 && echo "--network=host") .
+      docker build --target=final -t kyokley/lockbox $(test $USE_HOST_NET -eq 1 && echo "--network=host") .
     '';
     build-dev.exec = ''
       docker build --target=dev -t kyokley/lockbox $(test $USE_HOST_NET -eq 1 && echo "--network=host") .
@@ -42,6 +42,10 @@
     '';
     lockbox.exec = ''
       uv run python scripts/lockbox.py "$@"
+    '';
+    publish.exec = "build && docker push kyokley/lockbox";
+    shell.exec = ''
+      docker run --rm -it --entrypoint bash -v $(pwd):/code kyokley/lockbox
     '';
   };
 
