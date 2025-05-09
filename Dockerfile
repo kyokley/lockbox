@@ -17,7 +17,7 @@ WORKDIR /code
 ENTRYPOINT ["uv", "run", "--no-sync", "python", "scripts/lockbox.py"]
 
 FROM base AS dev
-RUN uv sync --frozen
+RUN apt update && apt install -y g++ && uv sync --frozen
 COPY . /code
 
 FROM base AS final
