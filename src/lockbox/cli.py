@@ -71,6 +71,7 @@ def cli_encrypt(
                     if confirm.lower() not in YES:
                         raise LockBoxException("User Aborted")
                 encrypt_directory(passphrase, infile)
+                print(term.green("Done"))
 
 
 def _validate_files(infile, outfile, force):
@@ -152,3 +153,4 @@ def cli_decrypt(
                 )
             else:
                 decrypt_directory(passphrase, infile)
+                print(term.green("Done"))

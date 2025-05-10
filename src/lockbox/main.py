@@ -8,6 +8,8 @@ from cryptography.hazmat.backends import default_backend
 from cryptography.hazmat.primitives import hashes
 from cryptography.hazmat.primitives.kdf.pbkdf2 import PBKDF2HMAC
 
+from tqdm import tqdm
+
 import qrcode
 
 LOCKBOX_SUFFIX = ".lockbox"
@@ -23,6 +25,20 @@ QR_CODE_EXTENSIONS = (".png",)
 
 class LockBoxException(Exception):
     pass
+
+
+def _count_files(path):
+    total_files = 0
+    for root, dirs, files in os.walk(path):
+        total_files += len(files)
+    return total_files
+
+
+def _path_generator(directory):
+    for root, dirs, files in os.walk(directory):
+        for file in files:
+            fullpath = Path(root) / file
+            yield fullpath
 
 
 def _get_fernet(password, salt):
@@ -147,17 +163,14 @@ def encrypt_directory(password, directory):
     if not directory.is_dir():
         raise LockBoxException(f"{directory} is not a directory")
 
-    for root, dirs, files in os.walk(directory):
-        for file in files:
-            fullpath = Path(root) / file
+    file_count = _count_files(directory)
 
-            if fullpath.is_symlink():
-                continue
+    for fullpath in tqdm(_path_generator(directory), total=file_count):
+        if fullpath.is_symlink():
+            continue
 
-            output_file = fullpath.parent / f"{fullpath.name}{LOCKBOX_SUFFIX}"
-            encrypt_file(
-                password, fullpath, output_file=output_file, remove_original=True
-            )
+        output_file = fullpath.parent / f"{fullpath.name}{LOCKBOX_SUFFIX}"
+        encrypt_file(password, fullpath, output_file=output_file, remove_original=True)
 
 
 def decrypt_directory(password, directory):
@@ -166,14 +179,11 @@ def decrypt_directory(password, directory):
     if not directory.is_dir():
         raise LockBoxException(f"{directory} is not a directory")
 
-    for root, dirs, files in os.walk(directory):
-        for file in files:
-            fullpath = Path(root) / file
+    file_count = _count_files(directory)
 
-            if fullpath.is_symlink() or fullpath.suffix != LOCKBOX_SUFFIX:
-                continue
+    for fullpath in tqdm(_path_generator(directory), total=file_count):
+        if fullpath.is_symlink() or fullpath.suffix != LOCKBOX_SUFFIX:
+            continue
 
-            output_file = fullpath.parent / fullpath.stem
-            decrypt_file(
-                password, fullpath, output_file=output_file, remove_original=True
-            )
+        output_file = fullpath.parent / fullpath.stem
+        decrypt_file(password, fullpath, output_file=output_file, remove_original=True)
