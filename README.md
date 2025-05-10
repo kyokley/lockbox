@@ -1,4 +1,4 @@
-# LockBox [![publish images](https://github.com/kyokley/lockbox/actions/workflows/publish.yml/badge.svg)](https://github.com/kyokley/lockbox/actions/workflows/publish.yml)
+# LockBox [![build](https://github.com/kyokley/lockbox/actions/workflows/publish.yml/badge.svg)](https://github.com/kyokley/lockbox/actions/workflows/publish.yml)
 Simple Passphrase-based AES Encryption
 
 ## Purpose
