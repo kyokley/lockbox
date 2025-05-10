@@ -14,7 +14,7 @@ RUN uv sync --frozen --no-dev
 
 WORKDIR /code
 
-ENTRYPOINT ["uv", "run", "--no-sync", "python", "scripts/lockbox.py"]
+ENTRYPOINT ["uv", "run", "--no-sync", "python", "lockbox"]
 
 FROM base AS dev
 RUN apt-get update && apt-get install -y g++ && uv sync --frozen
