@@ -1,83 +1,100 @@
-# LockBox [![Build Status](https://travis-ci.org/kyokley/lockbox.svg?branch=master)](https://travis-ci.org/kyokley/lockbox)
+# LockBox [![build](https://github.com/kyokley/lockbox/actions/workflows/publish.yml/badge.svg)](https://github.com/kyokley/lockbox/actions/workflows/publish.yml)
 Simple Passphrase-based AES Encryption
 
 ## Purpose
 Lockbox is a wrapper around [cryptography's](https://cryptography.io/en/latest/) fernet symmetric key encryption implementation. The goal is to be as simple as possible. The only inputs required are a passphrase and the data to be encrypted/decrypted.
 
+## Installation:
+The easiest way to install the application is to create a docker image from the included Dockerfile. This can be done by running the following command:
+```
+docker build -t kyokley/lockbox .
+```
+Once built, the application can be run as so:
+```
+docker run --rm -it kyokley/lockbox --help
+```
+
 ## Usage:
 ### Basic Examples
-```
->>> from lockbox import encrypt, decrypt
-
->>> ciphertext = encrypt(b'password', b'this is a secret')
->>> ciphertext
-b'vMFVfjg...'
-
->>> decrypt(b'password', ciphertext)
-b'this is a secret'
-```
-Or using the CLI,
+With docker,
 ```bash
-$ lockbox encrypt -s 'this is a secret'
+$ docker run --rm -it kyokley/lockbox encrypt --string="plaintext for encrypting"
+Enter passphrase:
+Confirm passphrase:
+E1aV9FL6moiGzIgF_B_ZbA==$gAAAAABoH4--Scx5AtYgBIeNFkv6H7VKESDeZLml9_G7EATOU1AVaAUpSmJMOra0Ep8_-QLgI9KgjwDV2P2JxGXCcPoexsmlFpO89dsU43_mGCG2aJHl0Uo=
+
+$ docker run --rm -it kyokley/lockbox decrypt --string='E1aV9FL6moiGzIgF_B_ZbA==$gAAAAABoH4--Scx5AtYgBIeNFkv6H7VKESDeZLml9_G7EATOU1AVaAUpSmJMOra0Ep8_-QLgI9KgjwDV2P2JxGXCcPoexsmlFpO89dsU43_mGCG2aJHl0Uo='
+Enter passphrase:
+plaintext for encrypting
+```
+
+Or if uv is installed, from the commandline,
+```bash
+$ ./lockbox encrypt -s 'this is a secret'
 Enter passphrase:
 Confirm passphrase:
 vMFVfjg...
 
-$ lockbox decrypt 'vMFVfjg...'
+$ ./lockbox decrypt -s 'vMFVfjg...'
 Enter passphrase:
 this is a string
 
-$ lockbox -h
-Usage:
-    lockbox <cmd> [<input>] [options]
-    lockbox --version
-    lockbox --help
+$ ./lockbox --help
+usage: lockbox [-h] [--version] {encrypt,decrypt} ...
 
-Arguments:
-    cmd    encrypt or decrypt
-    input  file to be used for input
-           specify '-' to use stdin
+Simple cryptographic CLI
 
-Options:
-    -s STRING --string=STRING   STRING to be used as the input data for encrypting/decrypting
-    -o FILE --output=FILE       file to be used for outputted data
-                                specifying an output file with a '.png'
-                                extension will write a QR code to FILE
-    -h --help                   display this help
+positional arguments:
+  {encrypt,decrypt}
 
-Without -o FILE given, lockbox will display data to stdout
+options:
+  -h, --help         show this help message and exit
+  --version
 
-Be careful using the -s STRING option on the command line as your unencrypted plaintext may be stored in your history.
-Also, when using the -s option, any data provided through stdin will be ignored.
-```
 
-### Other Examples
-Lockbox also works against files
-```
->>> from lockbox import encrypt_file, decrypt_file
->>> encrypt_file(b'password', '/path/to/file', output_file='/path/to/file.enc')
+$ ./lockbox encrypt --help
+usage: lockbox encrypt [-h] [-s STRING | -i INPUT] [-o OUTPUT] [-r] [--remove-original] [-f]
 
->>> decrypt_file(b'password', '/path/to/file.enc', output_file='/path/to/decrypted')
-```
-In the example above, after completing the decryption step, the files */path/to/file* and */path/to/decrypted* should have the same contents.
+Encrypt data
 
-## Installation:
-Currently, this package is not available on PYPI so the easiest way to install it is to use pip and install from git
+options:
+  -h, --help            show this help message and exit
+  -s STRING, --string STRING
+                        string to be used as the input data for encrypting
+  -i INPUT, --input INPUT
+                        file or directory to be used for input
+  -o OUTPUT, --output OUTPUT
+                        file to be used for outputted data, specifying an output file with a '.png' extension will write a
+                        QR code
+  -r, --recursive       recursively encrypt all files in the directory given as input
+  --remove-original     delete input file after encryption is completed
+  -f, --force           ignore warnings and force action
 
-From inside a virtualenv, run the following:
-```
-$ pip install git+https://github.com/kyokley/lockbox/
-```
+Be careful using the -s STRING option on the command line as your unencrypted plaintext may be stored in your history. Also,
+when using the -s option, any data provided through stdin will be ignored.
 
-Alternatively, it is possible to compile from source.
-```
-$ git clone https://github.com/kyokley/lockbox.git
-$ cd lockbox
-$ python setup.py install
+
+$ ./lockbox decrypt --help
+usage: lockbox decrypt [-h] [-s STRING | -i INPUT] [-o OUTPUT] [-r] [--remove-original] [-f]
+
+Decrypt data
+
+options:
+  -h, --help            show this help message and exit
+  -s STRING, --string STRING
+                        string to be used as the input data for decrypting
+  -i INPUT, --input INPUT
+                        file or directory to be used for input
+  -o OUTPUT, --output OUTPUT
+                        file to be used for outputted data, specifying an output file with a '.png' extension will write
+                        a QR code
+  -r, --recursive       recursively decrypt all files in the directory given as input
+  --remove-original     delete input file after decryption is completed
+  -f, --force           ignore warnings and force action
 ```
 
 ## Technical Details
-From the cryptography implementation details, the fernet specification is implemented as follows:
+From the [cryptography implementation details](https://cryptography.io/en/latest/fernet/#implementation), the fernet specification is implemented as follows:
 
 > Fernet is built on top of a number of standard cryptographic primitives. Specifically it uses:
 >

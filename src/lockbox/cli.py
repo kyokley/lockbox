@@ -57,7 +57,21 @@ def cli_encrypt(
                     )
                 )
             else:
+                if recursive and remove_original:
+                    print(
+                        term.yellow(
+                            "WARNING: Recursively encrypting files and removing originals is extremely dangerous!"
+                        )
+                    )
+                    confirm = input(
+                        term.yellow(
+                            f"Are you absolutely sure you want to recursively encrypt all files in {infile}? [y/N] "
+                        )
+                    )
+                    if confirm.lower() not in YES:
+                        raise LockBoxException("User Aborted")
                 encrypt_directory(passphrase, infile)
+                print(term.green("Done"))
 
 
 def _validate_files(infile, outfile, force):
@@ -139,3 +153,4 @@ def cli_decrypt(
                 )
             else:
                 decrypt_directory(passphrase, infile)
+                print(term.green("Done"))

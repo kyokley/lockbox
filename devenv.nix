@@ -41,7 +41,7 @@
       docker run --rm -t --entrypoint uv -v $(pwd):/code --workdir /code kyokley/lockbox run pytest
     '';
     lockbox.exec = ''
-      uv run python scripts/lockbox.py "$@"
+      uv run python lockbox "$@"
     '';
     publish.exec = "build && docker push kyokley/lockbox";
     shell.exec = ''

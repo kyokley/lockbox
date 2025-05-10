@@ -1,4 +1,4 @@
-name: 'publish images'
+name: 'build'
 
 on:
   push:
@@ -28,7 +28,8 @@ jobs:
 
       - name: Install devenv.sh
         run: nix profile install nixpkgs#devenv
-      - name: Build the devenv shell and run any pre-commit hooks
+
+      - name: Run tests
         run: devenv test
 
       - name: Login to DockerHub
