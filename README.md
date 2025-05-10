@@ -1,4 +1,4 @@
-# LockBox [![Build Status](https://travis-ci.org/kyokley/lockbox.svg?branch=master)](https://travis-ci.org/kyokley/lockbox)
+# LockBox [![publish images](https://github.com/kyokley/lockbox/actions/workflows/publish.yml/badge.svg)](https://github.com/kyokley/lockbox/actions/workflows/publish.yml)
 Simple Passphrase-based AES Encryption
 
 ## Purpose
@@ -7,7 +7,7 @@ Lockbox is a wrapper around [cryptography's](https://cryptography.io/en/latest/)
 ## Usage:
 ### Basic Examples
 ```
->>> from lockbox import encrypt, decrypt
+>>> from src.lockbox import encrypt, decrypt
 
 >>> ciphertext = encrypt(b'password', b'this is a secret')
 >>> ciphertext
@@ -54,7 +54,7 @@ Also, when using the -s option, any data provided through stdin will be ignored.
 ### Other Examples
 Lockbox also works against files
 ```
->>> from lockbox import encrypt_file, decrypt_file
+>>> from src.lockbox import encrypt_file, decrypt_file
 >>> encrypt_file(b'password', '/path/to/file', output_file='/path/to/file.enc')
 
 >>> decrypt_file(b'password', '/path/to/file.enc', output_file='/path/to/decrypted')
@@ -62,18 +62,13 @@ Lockbox also works against files
 In the example above, after completing the decryption step, the files */path/to/file* and */path/to/decrypted* should have the same contents.
 
 ## Installation:
-Currently, this package is not available on PYPI so the easiest way to install it is to use pip and install from git
-
-From inside a virtualenv, run the following:
+The easiest way to install the application is to create a docker image from the included Dockerfile. This can be done by running the following command:
 ```
-$ pip install git+https://github.com/kyokley/lockbox/
+docker build -t kyokley/lockbox .
 ```
-
-Alternatively, it is possible to compile from source.
+Once built, the application can be run as so:
 ```
-$ git clone https://github.com/kyokley/lockbox.git
-$ cd lockbox
-$ python setup.py install
+docker run --rm -it kyokley/lockbox --help
 ```
 
 ## Technical Details
