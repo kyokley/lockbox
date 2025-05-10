@@ -16,39 +16,69 @@ b'vMFVfjg...'
 >>> decrypt(b'password', ciphertext)
 b'this is a secret'
 ```
-Or using the CLI,
+Or if uv is installed, from the commandline,
 ```bash
-$ lockbox encrypt -s 'this is a secret'
+$ ./lockbox encrypt -s 'this is a secret'
 Enter passphrase:
 Confirm passphrase:
 vMFVfjg...
 
-$ lockbox decrypt 'vMFVfjg...'
+$ ./lockbox decrypt -s 'vMFVfjg...'
 Enter passphrase:
 this is a string
 
-$ lockbox -h
-Usage:
-    lockbox <cmd> [<input>] [options]
-    lockbox --version
-    lockbox --help
+$ ./lockbox --help
+usage: lockbox [-h] [--version] {encrypt,decrypt} ...
 
-Arguments:
-    cmd    encrypt or decrypt
-    input  file to be used for input
-           specify '-' to use stdin
+Simple cryptographic CLI
 
-Options:
-    -s STRING --string=STRING   STRING to be used as the input data for encrypting/decrypting
-    -o FILE --output=FILE       file to be used for outputted data
-                                specifying an output file with a '.png'
-                                extension will write a QR code to FILE
-    -h --help                   display this help
+positional arguments:
+  {encrypt,decrypt}
 
-Without -o FILE given, lockbox will display data to stdout
+options:
+  -h, --help         show this help message and exit
+  --version
 
-Be careful using the -s STRING option on the command line as your unencrypted plaintext may be stored in your history.
-Also, when using the -s option, any data provided through stdin will be ignored.
+
+$ ./lockbox encrypt --help
+usage: lockbox encrypt [-h] [-s STRING | -i INPUT] [-o OUTPUT] [-r] [--remove-original] [-f]
+
+Encrypt data
+
+options:
+  -h, --help            show this help message and exit
+  -s STRING, --string STRING
+                        string to be used as the input data for encrypting
+  -i INPUT, --input INPUT
+                        file or directory to be used for input
+  -o OUTPUT, --output OUTPUT
+                        file to be used for outputted data, specifying an output file with a '.png' extension will write a
+                        QR code
+  -r, --recursive       recursively encrypt all files in the directory given as input
+  --remove-original     delete input file after encryption is completed
+  -f, --force           ignore warnings and force action
+
+Be careful using the -s STRING option on the command line as your unencrypted plaintext may be stored in your history. Also,
+when using the -s option, any data provided through stdin will be ignored.
+
+
+$ ./lockbox decrypt --help
+usage: lockbox decrypt [-h] [-s STRING | -i INPUT] [-o OUTPUT] [-r] [--remove-original] [-f]
+
+Decrypt data
+
+options:
+  -h, --help            show this help message and exit
+  -s STRING, --string STRING
+                        string to be used as the input data for decrypting
+  -i INPUT, --input INPUT
+                        file or directory to be used for input
+  -o OUTPUT, --output OUTPUT
+                        file to be used for outputted data, specifying an output file with a '.png' extension will write
+                        a QR code
+  -r, --recursive       recursively decrypt all files in the directory given as input
+  --remove-original     delete input file after decryption is completed
+  -f, --force           ignore warnings and force action
 ```
 
 ### Other Examples
@@ -72,7 +102,7 @@ docker run --rm -it kyokley/lockbox --help
 ```
 
 ## Technical Details
-From the cryptography implementation details, the fernet specification is implemented as follows:
+From the [cryptography implementation details](https://cryptography.io/en/latest/fernet/#implementation), the fernet specification is implemented as follows:
 
 > Fernet is built on top of a number of standard cryptographic primitives. Specifically it uses:
 >
