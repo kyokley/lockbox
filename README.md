@@ -4,18 +4,30 @@ Simple Passphrase-based AES Encryption
 ## Purpose
 Lockbox is a wrapper around [cryptography's](https://cryptography.io/en/latest/) fernet symmetric key encryption implementation. The goal is to be as simple as possible. The only inputs required are a passphrase and the data to be encrypted/decrypted.
 
+## Installation:
+The easiest way to install the application is to create a docker image from the included Dockerfile. This can be done by running the following command:
+```
+docker build -t kyokley/lockbox .
+```
+Once built, the application can be run as so:
+```
+docker run --rm -it kyokley/lockbox --help
+```
+
 ## Usage:
 ### Basic Examples
-```
->>> from src.lockbox import encrypt, decrypt
+With docker,
+```bash
+$ docker run --rm -it kyokley/lockbox encrypt --string="plaintext for encrypting"
+Enter passphrase:
+Confirm passphrase:
+E1aV9FL6moiGzIgF_B_ZbA==$gAAAAABoH4--Scx5AtYgBIeNFkv6H7VKESDeZLml9_G7EATOU1AVaAUpSmJMOra0Ep8_-QLgI9KgjwDV2P2JxGXCcPoexsmlFpO89dsU43_mGCG2aJHl0Uo=
 
->>> ciphertext = encrypt(b'password', b'this is a secret')
->>> ciphertext
-b'vMFVfjg...'
-
->>> decrypt(b'password', ciphertext)
-b'this is a secret'
+$ docker run --rm -it kyokley/lockbox decrypt --string='E1aV9FL6moiGzIgF_B_ZbA==$gAAAAABoH4--Scx5AtYgBIeNFkv6H7VKESDeZLml9_G7EATOU1AVaAUpSmJMOra0Ep8_-QLgI9KgjwDV2P2JxGXCcPoexsmlFpO89dsU43_mGCG2aJHl0Uo='
+Enter passphrase:
+plaintext for encrypting
 ```
+
 Or if uv is installed, from the commandline,
 ```bash
 $ ./lockbox encrypt -s 'this is a secret'
@@ -79,26 +91,6 @@ options:
   -r, --recursive       recursively decrypt all files in the directory given as input
   --remove-original     delete input file after decryption is completed
   -f, --force           ignore warnings and force action
-```
-
-### Other Examples
-Lockbox also works against files
-```
->>> from src.lockbox import encrypt_file, decrypt_file
->>> encrypt_file(b'password', '/path/to/file', output_file='/path/to/file.enc')
-
->>> decrypt_file(b'password', '/path/to/file.enc', output_file='/path/to/decrypted')
-```
-In the example above, after completing the decryption step, the files */path/to/file* and */path/to/decrypted* should have the same contents.
-
-## Installation:
-The easiest way to install the application is to create a docker image from the included Dockerfile. This can be done by running the following command:
-```
-docker build -t kyokley/lockbox .
-```
-Once built, the application can be run as so:
-```
-docker run --rm -it kyokley/lockbox --help
 ```
 
 ## Technical Details
